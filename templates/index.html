@@ -4,34 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuno - Portfolio</title>
+
+    <link rel="shortcut icon" href="https://sidang.cs.ui.ac.id/static/media/fasilkom.5f08cf824cb2e94af912.png">
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
+
+    <!-- Stylesheet (added cache-busting parameter ?v=1) -->
+    <link rel="stylesheet" href="static/css/style.css?v=1">
 </head>
 <body>
+
+    <!-- HEADER -->
     <header class="site-header">
-        <div class="container">
+        <div class="container header-container">
             <a href="#profile" class="brand">Nuno</a>
             <nav>
                 <a href="#profile">Profile</a>
+                <a href="#projects">Projects</a>
             </nav>
         </div>
     </header>
 
     <main>
+        <!-- PROFILE / HERO -->
         <section class="hero" id="profile">
             <div class="container hero-grid">
+
                 <div class="hero-identity">
-                    <p class="hero-kicker">Computer Science &middot; Universitas Indonesia</p>
+                    <p class="hero-kicker">
+                        Computer Science &middot; Universitas Indonesia
+                    </p>
                     <h1>Nuno Mikael Nugroho</h1>
                 </div>
+
                 <div class="hero-photo">
-                    <div class="photo-block"></div>
-                    <img class="avatar" src="static/img/pbpavatar.jpg" alt="Photo of Nuno">
+                    <div class="hero-photo-block"></div>
+                    <img 
+                        class="avatar" 
+                        src="static/img/pbpavatar.jpg" 
+                        alt="Photo of Nuno"
+                    >
                 </div>
+
                 <div class="hero-details">
-                    <p class="bio">CS student at Universitas Indonesia fighting to survive. I like watchig movies, listening to music, and playing video games.</p>
+                    <p class="bio">
+                        CS student at Universitas Indonesia fighting to survive.
+                        I like watching movies, listening to music, and playing video games.
+                    </p>
+
                     <dl class="meta-list">
                         <div class="meta-row">
                             <dt>NPM</dt>
@@ -42,20 +65,249 @@
                             <dd>S1 Ilmu Komputer</dd>
                         </div>
                     </dl>
+
                     <div class="social-links">
-                        <a href="https://github.com/gammaknives" class="social-link">GitHub</a>
-                        <a href="https://www.linkedin.com/in/nuno-mikael-nugroho-70b428380/" class="social-link">LinkedIn</a>
-                        <a href="mailto:nuno42.mikael@gmail.com" class="social-link">Email</a>
+                        <a href="https://github.com/gammaknives" class="social-link" target="_blank" rel="noopener noreferrer">
+                            GitHub
+                        </a>
+                        <a href="https://www.linkedin.com/in/nuno-mikael-nugroho-70b428380/" class="social-link" target="_blank" rel="noopener noreferrer">
+                            LinkedIn
+                        </a>
+                        <a href="mailto:nuno42.mikael@gmail.com" class="social-link">
+                            Email
+                        </a>
                     </div>
                 </div>
+
+            </div>
+        </section>
+
+        <!-- PROJECTS -->
+        <section class="projects" id="projects">
+            <div class="container">
+                <h2>Projects</h2>
+
+                <!-- PROJECT 1 (Text Left, Image Right) -->
+                <div class="project-row">
+                    <div class="project-text">
+                        <h3>Boneka Bayangan</h3>
+                        <p>
+                            A short movie about a boy who loves to play with "wayang" (shadow puppets)
+                            and his struggles against people who ridicule traditional art. Competed and won
+                            in the FLS2N Short Movie Competition in 2024. I worked as a scriptwriter and a 
+                            co-director for this project.
+                        </p>
+                        <div class="project-tags">
+                            <span class="tag">Film</span>
+                            <span class="tag">Directing</span>
+                            <span class="tag">Scriptwriting</span>
+                        </div>
+                        <a href="https://drive.google.com/file/d/1viMSeU9cqk5rn-jEcw4O9iR4YvgG2XaI/view?usp=sharing"
+                            class="project-link" 
+                            target="_blank" 
+                            rel="noopener noreferrer">
+                            View Project &rarr;
+                        </a>
+                    </div>
+
+                    <div class="project-photo">
+                        <div class="project-photo-block"></div>
+                        <a target = "_blank" href = "https://drive.google.com/file/d/1viMSeU9cqk5rn-jEcw4O9iR4YvgG2XaI/view?usp=sharing">
+                            <img 
+                                class="project-img" 
+                                src="https://a.ltrbxd.com/resized/avatar/upload/4/4/1/3/6/1/6/shard/avtr-0-1000-0-1000-crop.jpg?v=e7c0403049" 
+                                alt="Screenshot of Boneka Bayangan"
+                            >
+                        </a>
+                    </div>
+                </div>
+
+                <!-- PROJECT 2 (Image Left, Text Right) -->
+                <div class="project-row project-row-reverse">
+                    <div class="project-text">
+                        <h3>PiezoSun Path</h3>
+                        <p>
+                            A project integrating piezoelectric technology with solar panels 
+                            to create an advanced, eco-friendly energy harvesting system. Competed 
+                            and won on the National Instrumentation Festival 2025 issued by Institut
+                            Teknologi Sepuluh Nopember.
+                        </p>
+                        <div class="project-tags">
+                            <span class="tag">Innovation</span>
+                            <span class="tag">Hardware</span>
+                            <span class="tag">Research</span>
+                        </div>
+                        <a href="https://canva.link/hjkmeknx1vl34hn"
+                            class="project-link" 
+                            target="_blank" 
+                            rel="noopener noreferrer">
+                            View Project &rarr;
+                        </a>
+                    </div>
+
+                    <div class="project-photo">
+                        <div class="project-photo-block"></div>
+                        <a target = "_blank" href = "https://canva.link/hjkmeknx1vl34hn">
+                            <img 
+                                class="project-img" 
+                                src="static/img/piezosunpath.png" 
+                                alt="Screenshot of PiezoSun Path"
+                            >
+                        </a>
+                    </div>
+                </div>
+
+                <!-- PROJECT 3 (Text Left, Image Right) -->
+                <div class="project-row">
+                    <div class="project-text">
+                        <h3>Grantha Aksata</h3>
+                        <p>
+                            A short movie about a guy trying to find a reason why his 
+                            friend committed suicide while he deals with his grief. Competed 
+                            and won in the Elate 2024 Short Movie Competition. I worked 
+                            as a scriptwriter.
+                        </p>
+                        <div class="project-tags">
+                            <span class="tag">Film</span>
+                            <span class="tag">Scriptwriting</span>
+                        </div>
+                        <a href="https://drive.google.com/file/d/1UnCCTH9X8L8-OOokqTSrUD2n-wjTqYGF/view?usp=sharing"
+                            class="project-link" 
+                            target="_blank" 
+                            rel="noopener noreferrer">
+                            View Project &rarr;
+                        </a>
+                    </div>
+
+                    <div class="project-photo">
+                        <div class="project-photo-block"></div>
+                        <a target = "_blank" href = "https://drive.google.com/file/d/1UnCCTH9X8L8-OOokqTSrUD2n-wjTqYGF/view?usp=sharing">
+                            <img 
+                                class="project-img" 
+                                src="static/img/granthaaksata.png" 
+                                alt="Screenshot of Grantha Aksata"
+                            >
+                        </a>
+                    </div>
+                </div>
+
+                <!-- PROJECT 4 (Image Left, Text Right) -->
+                <div class="project-row project-row-reverse">
+                    <div class="project-text">
+                        <h3>Karya Tulis Strategi Pemasaran Kedai “Kopi Tuku” dalam Menjaga Loyalitas Konsumen remaja putri Jakarta Selatan</h3>
+                        <p>
+                            A written work about marketing strategies implemented by "Kopi Tuku" in 
+                            South Jakarta to maintain customer loyalty among teenage girls. Used as 
+                            a final project / paper for SMA Kolese Gonzaga.
+                        </p>
+                        <div class="project-tags">
+                            <span class="tag">Writing</span>
+                            <span class="tag">Research</span>
+                        </div>
+                        <a href="https://docs.google.com/document/d/1SGV-7-ITVS_FhYDvMqOJ3r0dihZWQ48PErTfy5GV-Dw/edit?usp=sharing"
+                            class="project-link" 
+                            target="_blank" 
+                            rel="noopener noreferrer">
+                            View Project &rarr;
+                        </a>
+                    </div>
+
+                    <div class="project-photo">
+                        <div class="project-photo-block"></div>
+                        <a target = "_blank" href = "https://docs.google.com/document/d/1SGV-7-ITVS_FhYDvMqOJ3r0dihZWQ48PErTfy5GV-Dw/edit?usp=sharing">
+                            <img 
+                                class="project-img" 
+                                src="static/img/kartul.png" 
+                                alt="Screenshot of Karya Tulis"
+                            >
+                        </a>
+                    </div>
+                </div>
+
+                <!-- PROJECT 5 (Text Left, Image Right) -->
+                <div class="project-row">
+                    <div class="project-text">
+                        <h3>Messenger</h3>
+                        <p>
+                            A short movie about a guy struggling to keep his letter 
+                            writing business afloat as he tries to find innovations to 
+                            keep his business relevant in the modern world. An extracurricular 
+                            project for Sinematografi Gonzaga. I worked as a director and 
+                            scriptwriter for this project.
+                        </p>
+                        <div class="project-tags">
+                            <span class="tag">Film</span>
+                            <span class="tag">Directing</span>
+                            <span class="tag">Scriptwriting</span>
+                        </div>
+                        <a href="https://drive.google.com/file/d/1mBaSstUoP9bYTZRxyp9qfy0JpRGbpgJH/view?usp=sharing"
+                            class="project-link" 
+                            target="_blank" 
+                            rel="noopener noreferrer">
+                            View Project &rarr;
+                        </a>
+                    </div>
+
+                    <div class="project-photo">
+                        <div class="project-photo-block"></div>
+                        <a target = "_blank" href = "https://drive.google.com/file/d/1mBaSstUoP9bYTZRxyp9qfy0JpRGbpgJH/view?usp=sharing">
+                            <img 
+                                class="project-img" 
+                                src="static/img/messenger.png" 
+                                alt="Screenshot of Messenger"
+                            >
+                        </a>
+                    </div>
+                </div>
+
+                <!-- PROJECT 6 (Image Left, Text Right) -->
+                <div class="project-row project-row-reverse">
+                    <div class="project-text">
+                        <h3>Tiup Lilinnya</h3>
+                        <p>
+                            A short movie about a guy feeling lonely on his birthday 
+                            and his struggles to find a way to celebrate it. A small 
+                            project used as a presentation for a class assignment. 
+                            I worked as a director and scriptwriter for this project.
+                        </p>
+                        <div class="project-tags">
+                            <span class="tag">Film</span>
+                            <span class="tag">Directing</span>
+                            <span class="tag">Scriptwriting</span>
+                        </div>
+                        <a href="https://drive.google.com/file/d/1J6LdHUDafBiVb5Zy6VhWHOrT_-gFuXgI/view?usp=sharing"
+                            class="project-link" 
+                            target="_blank" 
+                            rel="noopener noreferrer">
+                            View Project &rarr;
+                        </a>
+                    </div>
+
+                    <div class="project-photo">
+                        <div class="project-photo-block"></div>
+                        <a target = "_blank" href = "https://drive.google.com/file/d/1J6LdHUDafBiVb5Zy6VhWHOrT_-gFuXgI/view?usp=sharing">
+                            <img 
+                                class="project-img" 
+                                src="static/img/tiuplilinnya.png" 
+                                alt="Screenshot of Tiup Lilinnya"
+                            >
+                        </a>
+                    </div>
+                </div>
+
             </div>
         </section>
     </main>
 
+    <!-- FOOTER -->
     <footer class="site-footer">
         <div class="container">
-            <p>&copy; 2026 Nuno. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
+            <p>
+                &copy; 2026 Nuno.
+                Fakultas Ilmu Komputer, Universitas Indonesia.
+            </p>
         </div>
     </footer>
+
 </body>
 </html>
