@@ -203,6 +203,48 @@ h3,
     border: 3px solid var(--ink);
 }
 
+/* =========================
+   SKILLS & TOOLS
+   ========================= */
+
+.skills {
+    padding: 2rem 0 3rem;
+}
+
+.skills h2 {
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    margin-bottom: 1.5rem;
+}
+
+.skills p {
+    color: #3e3d3d;
+    margin-bottom: 1.5rem;
+}
+
+.skills-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.pill {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ink);
+    background-color: rgba(255, 255, 255, 0.35);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius);
+    padding: 0.45rem 1rem;
+    transition: background-color 0.2s ease, transform 0.2s ease, color 0.2s ease;
+    cursor: default;
+}
+
+.pill:hover {
+    background-color: var(--ink);
+    color: var(--paper);
+    transform: translateY(-3px);
+}
+
 
 /* =========================
    PROJECTS
@@ -285,6 +327,7 @@ h3,
     padding: 0.3rem 0.6rem;
 }
 
+/* Default Orange Offset Box (Right) */
 .project-photo-block {
     position: absolute;
     top: 1.25rem;
@@ -294,6 +337,11 @@ h3,
     background-color: var(--accent);
     border-radius: var(--radius);
     z-index: 0;
+}
+
+/* Reversed Orange Offset Box (Left) */
+.project-row-reverse .project-photo-block {
+    left: -1.25rem;
 }
 
 .project-img {
@@ -306,13 +354,12 @@ h3,
     object-fit: cover;
     border-radius: var(--radius);
     border: 3px solid var(--ink);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .project-img:hover {
     transform: scale(1.02);
-    transition: transform 0.2s ease;
-    box-shadow: 0 0 50px rgb(255, 238, 1);
-    
+    box-shadow: 0 0 25px rgba(255, 238, 1, 0.6);
 }
 
 .project-link {
