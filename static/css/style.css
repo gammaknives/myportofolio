@@ -4,6 +4,10 @@
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 :root {
     --ink: #1c1917;
     --paper: #4dcdec;
@@ -40,6 +44,12 @@ h3,
    ========================= */
 
 .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-image: url("https://img.magnific.com/free-vector/abstract-elegant-business-presentation-backdrop-design_1017-60098.jpg?semt=ais_hybrid&w=740&q=80");
+    background-repeat: repeat;
+    background-position: center;
     border-bottom: 3px solid var(--line);
 }
 
@@ -228,6 +238,9 @@ h3,
 }
 
 .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--ink);
@@ -239,10 +252,16 @@ h3,
     cursor: default;
 }
 
+.pill-icon {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
 .pill:hover {
     background-color: var(--ink);
     color: var(--paper);
-    transform: translateY(-3px);
 }
 
 
@@ -359,7 +378,7 @@ h3,
 
 .project-img:hover {
     transform: scale(1.02);
-    box-shadow: 0 0 25px rgba(255, 238, 1, 0.6);
+    box-shadow: 0 0 50px rgba(255, 238, 1, 0.6);
 }
 
 .project-link {
@@ -376,18 +395,57 @@ h3,
     transform: translateX(3px);
 }
 
+.lightbox-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background-color: rgba(28, 25, 23, 0.85);
+    justify-content: center;
+    align-items: center;
+}
+
+/* Shows modal when targeted in URL anchor */
+.lightbox-modal:target {
+    display: flex;
+}
+
+.lightbox-content {
+    max-width: 85%;
+    max-height: 85%;
+    border: 3px solid var(--ink);
+    border-radius: var(--radius);
+}
+
+.lightbox-close {
+    position: absolute;
+    top: 20px; right: 30px;
+    font-size: 2.5rem;
+    color: var(--accent);
+    text-decoration: none;
+}
+
 
 /* =========================
    FOOTER
    ========================= */
 
 .site-footer {
-    padding: 1.5rem;
+    background-image: url("https://www.pixelstalk.net/wp-content/uploads/images6/Light-Blue-Backgrounds-HD.jpg");
+    background-size: cover;
+    background-position: center;
     color: var(--text-muted);
     font-size: 0.85rem;
     border-top: 3px solid var(--line);
+    padding: 1.5rem;
 }
 
+.hero,
+.skills,
+.projects {
+    scroll-margin-top: 80px;
+}
 
 /* =========================
    MOBILE RESPONSIVENESS
