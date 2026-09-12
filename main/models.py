@@ -24,3 +24,17 @@ class Experience(models.Model):
     @property
     def is_ongoing(self):
         return self.ended_at is None
+    
+class Project(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    tags = models.CharField(max_length=255, help_text="Comma-separated, e.g. Film, Directing, Scriptwriting")
+    thumbnail = models.URLField(blank=True, null=True)
+    link = models.URLField(blank=True, null=True)
+
+    def __str__(self):
+        return self.title
+
+    def get_tags(self):
+        return [tag.strip() for tag in self.tags.split(",") if tag.strip()]

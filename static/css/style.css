@@ -6,6 +6,7 @@
 
 html {
     scroll-behavior: smooth;
+    height: 100%;
 }
 
 :root {
@@ -23,6 +24,13 @@ body {
     color: var(--ink);
     background: linear-gradient(135deg,var(--paper), #3457d8);
     line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
 }
 
 h1,
