@@ -3,6 +3,7 @@ from django.shortcuts import render
 from main.models import Experience
 
 from main.models import Project
+from django.db.models import Q
 
 
 def show_main(request):
@@ -27,8 +28,19 @@ def show_experience(request):
     return render(request, "experiences.html", context)
 
 def show_project(request):
+    query = request.GET.get("q", "").strip()
+    projects = Project.objects.all()
+
+    if query:
+        projects = projects.filter(
+            Q(title__icontains=query) |
+            Q(description__icontains=query) |
+            Q(tags__icontains=query)
+        )
+
     context = {
         "name": "Nuno",
-        "project_list": Project.objects.all(),
+        "project_list": projects,
+        "query": query,
     }
     return render(request, "projects.html", context)

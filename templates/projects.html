@@ -32,6 +32,29 @@
             <div class="container">
                 <h2>Projects</h2>
 
+                <form method="get" class="project-search" action="{% url 'main:show_project' %}">
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ query }}"
+                    placeholder="Search projects by title, description, or tag..."
+                    class="project-search-input"
+                >
+                <button type="submit" class="project-search-btn">Search</button>
+                {% if query %}
+                    <a href="{% url 'main:show_project' %}" class="project-search-clear">Clear</a>
+                {% endif %}
+                </form>
+
+                {% if query %}
+                    <p class="project-search-status">
+                        Showing results for "<strong>{{ query }}</strong>"
+                    </p>
+                {% endif %}
+
+                <br>
+                <br>
+
                 {% for project in project_list %}
                     <div class="project-row{% if forloop.counter|divisibleby:2 %} project-row-reverse{% endif %}">
                         <div class="project-text">
@@ -65,7 +88,11 @@
                         {% endif %}
                     </div>
                 {% empty %}
-                    <p class="empty-state">Belum ada proyek yang ditambahkan.</p>
+                    {% if query %}
+                        <p class="empty-state">No projects found matching "{{ query }}".</p>
+                    {% else %}
+                        <p class="empty-state">Belum ada proyek yang ditambahkan.</p>
+                    {% endif %}
                 {% endfor %}
 
             </div>

@@ -1,3 +1,4 @@
+from django.template import response
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -106,3 +107,28 @@ class ProjectTest(TestCase):
 
         self.assertContains(response, "No Link Project")
         self.assertNotContains(response, "View Project")
+
+    def test_project_search_matches_title(self):
+        response = self.client.get(reverse("main:show_project"), {"q": "Boneka"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.project.title)
+
+    def test_project_search_matches_tag(self):
+        response = self.client.get(reverse("main:show_project"), {"q": "Directing"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.project.title)
+
+    def test_project_search_matches_description(self):
+        response = self.client.get(reverse("main:show_project"), {"q": "wayang"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.project.title)
+
+    def test_project_search_no_results(self):
+        response = self.client.get(reverse("main:show_project"), {"q": "xyz123nonexistent"})
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, self.project.title)
+        self.assertContains(response, 'No projects found matching "xyz123nonexistent"')
+
+    def test_project_search_is_case_insensitive(self):
+        response = self.client.get(reverse("main:show_project"), {"q": "boneka"})
+        self.assertContains(response, self.project.title)

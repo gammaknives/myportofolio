@@ -404,6 +404,62 @@ h3,
     transform: translateX(3px);
 }
 
+.project-search {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.project-search-input {
+    flex: 1;
+    min-width: 400px;
+    padding: 0.6rem 1rem;
+    font-size: 0.95rem;
+    border: 2px solid var(--ink);
+    border-radius: var(--radius);
+    background-color: rgba(255, 255, 255, 0.6);
+    color: var(--ink);
+}
+
+.project-search-input::placeholder {
+    color: var(--text-muted);
+}
+
+.project-search-btn {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--paper);
+    background-color: var(--ink);
+    border: none;
+    border-radius: var(--radius);
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.project-search-btn:hover {
+    background-color: var(--accent);
+}
+
+.project-search-clear {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent-dark);
+    text-decoration: none;
+}
+
+.project-search-clear:hover {
+    color: var(--accent);
+}
+
+.project-search-status {
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+}
+
 .lightbox-modal {
     display: none;
     position: fixed;
@@ -507,6 +563,16 @@ h3,
             "photo";
         gap: 1.5rem;
         margin-bottom: 4rem;
+    }
+
+    .project-search-input {
+        padding: 0.7rem 1rem;
+        font-size: 0.95rem;
+    }
+
+    .project-search-btn {
+        padding: 0.7rem 1.25rem;
+        font-size: 0.9rem;
     }
 
 }

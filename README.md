@@ -66,3 +66,62 @@ S1 Ilmu Komputer, Fakultas Ilmu Komputer, Universitas Indonesia
 
 ## License
 This project is created for academic purposes as part of coursework at Universitas Indonesia.
+
+# Website Portofolio Nuno Mikael Nugroho
+
+## Gambaran Umum
+Website portofolio pribadi yang dibuat untuk mata kuliah Pemrograman Berbasis Platform, menampilkan latar belakang, keahlian, pengalaman, dan proyek saya sebagai mahasiswa Ilmu Komputer di Universitas Indonesia. Awalnya dibangun sebagai situs statis untuk Tugas Individu 1, kemudian dikembangkan menjadi aplikasi Django dinamis menggunakan pola Model-View-Template (MVT) untuk Tugas Individu 2.
+
+## Fitur
+- **Tata letak responsif**
+    menyesuaikan dari tampilan desktop ke mobile menggunakan CSS Grid dan media queries
+- **Header navigasi sticky**
+    dengan smooth scroll ke bagian-bagian halaman
+- **Halaman Experience dinamis**
+    mengambil data dari model `Experience`, menampilkan peran, kategori, dan status masih berlangsung/selesai
+- **Halaman Projects dinamis**
+    mengambil data dari model `Project`, dengan tata letak teks/gambar yang berselang-seling di setiap proyek untuk ritme visual
+- **Kolom pencarian proyek**
+    memfilter proyek berdasarkan judul, deskripsi, atau tag menggunakan `Q` objects dari Django dan parameter query `GET` — tanpa JavaScript
+- **Lightbox penampil gambar**
+    klik gambar proyek mana pun untuk melihatnya secara penuh, dibuat dengan CSS murni (selector `:target`, tanpa JavaScript)
+- **Bagian Skills**
+    dengan pill berlabel ikon, dikelompokkan secara visual berdasarkan kategori
+- **Latar belakang CSS kustom untuk header, body, dan footer**
+    latar belakang gambar/tekstur untuk header dan footer, latar belakang gradasi warna untuk body
+
+## Tech Stack
+- **Django**
+    framework backend yang menangani routing, view, model, dan template (pola MVT)
+- **HTML5**
+    elemen semantik (`<header>`, `<nav>`, `<main>`, `<section>`, `<footer>`)
+- **CSS3** 
+    Grid layout, custom properties (CSS variables), media queries, `:target` untuk interaktivitas
+- **Google Fonts**
+    Space Grotesk
+
+Tidak ada JavaScript yang digunakan dalam proyek ini. Seluruh interaktivitas dicapai melalui logika sisi server Django yang dikombinasikan dengan teknik HTML/CSS murni.
+
+## Refleksi
+1. Ketika pengguna membuka halaman portofolio baru,misalnya project, alurnya dimulai dari permintaan HTTP yang dikirim browser ke server Django. Permintaan ini pertama kali diterima oleh `urls.py` proyek (`myportofolio/urls.py`), yang bertindak sebagai titik masuk utama dan mendelegasikan permintaan ke aplikasi yang sesuai menggunakan `include()`. Selanjutnya, `urls.py` aplikasi (`main/urls.py`) mencocokkan path URL (misalnya `project/`) dengan salah satu `path()` yang terdaftar, lalu memanggil fungsi view yang dipetakan ke path tersebut, yaitu `show_project`. Di dalam view, Django mengambil data yang dibutuhkan dari model (misalnya `Project.objects.all()`, atau hasil yang sudah difilter jika ada parameter pencarian), memasukkannya ke dalam sebuah `context` berupa dictionary. View kemudian memanggil `render()`, yang menggabungkan data pada `context` tersebut dengan template (`projects.html`) menggunakan Django Template Language. Di sinilah data dari model benar-benar disisipkan ke dalam struktur HTML melalui tag seperti `{{ project.title }}` atau perulangan `{% for project in project_list %}`. Hasil akhir berupa HTML yang sudah lengkap dengan data dikirim kembali sebagai response HTTP ke browser, yang kemudian merender halaman tersebut untuk ditampilkan kepada pengguna.
+
+2. Data untuk bagian portofolio baru sebaiknya disimpan pada model, bukan ditulis langsung di dalam template, karena model merepresentasikan sumber data tunggal yang terstruktur dan dapat diolah secara dinamis, sedangkan template seharusnya hanya bertugas menampilkan data, bukan menyimpannya. Jika data ditulis langsung (hardcoded) di template, setiap perubahan sekecil apa pun, misalnya menambah proyek baru atau memperbaiki deskripsi, mengharuskan saya mengedit file HTML secara manual, yang rentan terhadap kesalahan dan sulit diskalakan seiring bertambahnya jumlah data. Dengan menyimpan data pada model, saya bisa menambah, mengubah, atau menghapus data melalui Django Admin atau shell tanpa perlu menyentuh kode template maupun view sama sekali. Hal ini juga membuka kemungkinan fitur dinamis seperti pencarian dan filter, karena data dapat di-query dan diolah secara terprogram (misalnya menggunakan `Q` objects), sesuatu yang mustahil dilakukan jika data hanya berupa teks statis di HTML. Secara keseluruhan, pemisahan ini membuat aplikasi jauh lebih mudah dipelihara dan dikembangkan, karena perubahan data dan perubahan tampilan bisa dilakukan secara independen satu sama lain.
+
+3. `makemigrations` dan `migrate` adalah dua perintah yang saling melengkapi namun memiliki fungsi berbeda dalam siklus perubahan model Django. `makemigrations` bertugas membaca perubahan yang dibuat pada model (misalnya penambahan field baru, perubahan tipe data, atau penghapusan field) dan menghasilkan file migrasi yang berisi instruksi perubahan tersebut dalam format yang bisa dibaca Django, tetapi perintah ini belum benar-benar mengubah apa pun di database. Sementara itu, `migrate` bertugas menerapkan file migrasi yang sudah dibuat tersebut ke database sesungguhnya, sehingga struktur tabel di database benar-benar berubah sesuai dengan definisi model terbaru.
+
+Contoh nyata dari proyek saya sendiri adalah ketika saya mengubah field `started_at` pada model `Experience` dari `models.DateTimeField(auto_now_add=True)` menjadi `models.DateTimeField()` biasa, agar saya bisa mengisi tanggal mulai secara manual alih-alih otomatis diisi tanggal saat data dibuat. Setelah mengubah baris kode tersebut di `models.py`, saya perlu menjalankan `python manage.py makemigrations` agar Django mendeteksi perubahan pada field tersebut dan membuat file migrasi baru yang mencatat perubahan ini. Setelah itu, saya menjalankan `python manage.py migrate` agar perubahan tersebut benar-benar diterapkan ke database, sehingga kolom `started_at` pada tabel `Experience` tidak lagi otomatis terisi dan siap menerima nilai tanggal yang saya tentukan sendiri melalui shell.
+
+## AI Disclosure
+Saya menggunakan AI terutama untuk dua hal: brainstorming dan memperbaiki bug. Saat saya bingung mengenai apa yang harus ditambahkan agar situs web lebih menarik, saya meminta ide dari chatbot AI seperti Gemini milik Google dan Claude. Salah satu contohnya adalah pada bagian projects di mana saya ingin menambahkan ftur filtering untuk filter proyek-proyeknya berdasarkan tags yang disediakan. Tapi, fitur itu tidak terlalu berguna menurut saya karena jumlah proyeknya tidak terlalu banyak dan tags yang digunakan biasanya digunakan oleh banyak proyek sehingga tidak terlalu beragam antar proyek. Saya meminta ide kepada Claude dan akhirnya saya memilih untuk membuat sebuah search bar karena lebih praktikal dan mudah dipakai.
+Berikut adalah prompt yang saya gunakan:
+"Okay, so I want to add a tag filter for the projects but I don't think that would be very practical or interesting. What else can I add to projects to make it more dynamic and add more interactivity. Maybe something along the lines of filtering?"
+Selain untuk bertukar pikiran, saya menggunakan AI saat mengalami kendala dengan bug, untuk merapikan kode yang berantakan, serta menambahkan komentar agar kode lebih mudah dipahami. Meskipun menggunakan AI, saya selalu memeriksa ulang kodenya dan tidak sekadar copy paste, melainkan juga melakukan penyesuaian dan perubahan sendiri. Hal ini karena AI umumnya tidak memahami cara membuat tampilan visual yang menarik bagi manusia. Jadi, saya menggunakan kode dari AI sebagai kerangka dasar yang kemudian saya modifikasi sendiri, biasanya terkait warna, ukuran, dan tingkat kecerahan. Karena tugas ini melibatkan pembuatan situs web, AI tidak bisa melihat langsung seperti apa hasil akhirnya, sehingga AI mungkin tidak menyadari bahwa kode yang dihasilkannya bisa membuat tampilan situs menjadi berantakan atau kurang menarik.
+
+## Penulis
+**Nuno Mikael Nugroho**
+NPM: 2506624865
+Kelas: PBP D
+S1 Ilmu Komputer, Fakultas Ilmu Komputer, Universitas Indonesia
+
+## Lisensi
+Proyek ini dibuat untuk keperluan akademik sebagai bagian dari perkuliahan di Universitas Indonesia.
