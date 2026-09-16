@@ -1,153 +1,114 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ name }} - Portfolio</title>
+{% extends 'base.html' %}
 
-    <link rel="shortcut icon" href="https://sidang.cs.ui.ac.id/static/media/fasilkom.5f08cf824cb2e94af912.png">
+{% block title %}{{ name }} - Portfolio{% endblock title %}
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+{% block content %}
+<main>
+    <!-- PROFILE / HERO -->
+    <section class="hero" id="profile">
+        <div class="container hero-grid">
 
-    <!-- Stylesheet (added cache-busting parameter ?v=1) -->
-    <link rel="stylesheet" href="static/css/style.css?v=1">
-</head>
-<body>
-
-    <!-- HEADER -->
-    <header class="site-header">
-        <div class="container header-container">
-            <a href="{% url 'main:show_main' %}" class="brand">{{ name }}</a>
-            <nav>
-                <a href="{% url 'main:show_main' %}">Profile</a>
-                <a href="{% url 'main:show_experience' %}">Experience</a>
-                <a href="#skills">Skills</a>
-                <a href="{% url 'main:show_project' %}">Projects</a>
-            </nav>
-        </div>
-    </header>
-
-    <main>
-        <!-- PROFILE / HERO -->
-        <section class="hero" id="profile">
-            <div class="container hero-grid">
-
-                <div class="hero-identity">
-                    <p class="hero-kicker">
-                        Computer Science &middot; Universitas Indonesia
-                    </p>
-                    <h1>{{ full_name }}</h1>
-                </div>
-
-                <div class="hero-photo">
-                    <div class="hero-photo-block"></div>
-                    <img 
-                        class="avatar" 
-                        src="static/img/pbpavatar.jpg" 
-                        alt="Photo of {{ name }}"
-                    >
-                </div>
-
-                <div class="hero-details">
-                    <p class="bio">
-                        {{ bio }}
-                    </p>
-
-                    <dl class="meta-list">
-                        <div class="meta-row">
-                            <dt>NPM</dt>
-                            <dd>{{ npm }}</dd>
-                        </div>
-                        <div class="meta-row">
-                            <dt>Program</dt>
-                            <dd>{{ study_program }}</dd>
-                        </div>
-                    </dl>
-
-                    <div class="social-links">
-                        <a href="https://github.com/gammaknives" class="social-link" target="_blank" rel="noopener noreferrer">
-                            GitHub
-                        </a>
-                        <a href="https://www.linkedin.com/in/nuno-mikael-nugroho-70b428380/" class="social-link" target="_blank" rel="noopener noreferrer">
-                            LinkedIn
-                        </a>
-                        <a href="mailto:nuno42.mikael@gmail.com" class="social-link">
-                            Email
-                        </a>
-                    </div>
-                </div>
-
+            <div class="hero-identity">
+                <p class="hero-kicker">
+                    Computer Science &middot; Universitas Indonesia
+                </p>
+                <h1>{{ full_name }}</h1>
             </div>
-        </section>
 
-        <!-- SKILLS -->
-        <section class="skills" id="skills">
-            <div class="container">
-                <h2>Skills</h2>
-                <p>
-                    Abilities and languages I'm proficient in that I acquired through my 
-                    experiences in programming, filmmaking, and other creative endeavors.
+            <div class="hero-photo">
+                <div class="hero-photo-block"></div>
+                <img 
+                    class="avatar" 
+                    src="/static/img/pbpavatar.jpg" 
+                    alt="Photo of {{ name }}"
+                >
+            </div>
+
+            <div class="hero-details">
+                <p class="bio">
+                    {{ bio }}
                 </p>
 
-                <div class="skills-pills">
-                    <span class="pill">
-                        <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/3840px-Python-logo-notext.svg.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail" class="pill-icon" alt="">
-                        Python
-                    </span>
-                    <span class="pill">
-                        <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/1/18/ISO_C%2B%2B_Logo.svg/330px-ISO_C%2B%2B_Logo.svg.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail&_=20170928190710" class="pill-icon" alt="">
-                        C++
-                    </span>
-                    <span class="pill">
-                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968282.png" class="pill-icon" alt="">
-                        Java
-                    </span>
-                    <span class="pill">
-                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968267.png" class="pill-icon" alt="">
-                        HTML
-                    </span>
-                    <span class="pill">
-                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968242.png" class="pill-icon" alt="">
-                        CSS
-                    </span>
-                    <span class="pill">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original" class="pill-icon" alt="">
-                        JavaScript
-                    </span>
-                    <span class="pill">🎬 Directing</span>
-                    <span class="pill">✍️ Creative Writing</span>
-                    <span class="pill">🎥 Film Production</span>
-                    <span class="pill">🔍 Research</span>
-                    <span class="pill">🗣️ Public Speaking</span>
-                    <span class="pill">
-                        <img src="https://flagcdn.com/24x18/id.png" class="pill-icon" alt="">
-                        Bahasa Indonesia
-                    </span>
-                    <span class="pill">
-                        <img src="https://flagcdn.com/24x18/gb.png" class="pill-icon" alt="">
-                        English
-                    </span>
-                    <span class="pill">
-                        <img src="https://static.canva.com/static/images/favicon.ico" class="pill-icon" alt="">
-                        Canva
-                    </span>
+                <dl class="meta-list">
+                    <div class="meta-row">
+                        <dt>NPM</dt>
+                        <dd>{{ npm }}</dd>
+                    </div>
+                    <div class="meta-row">
+                        <dt>Program</dt>
+                        <dd>{{ study_program }}</dd>
+                    </div>
+                </dl>
+
+                <div class="social-links">
+                    <a href="https://github.com/gammaknives" class="social-link" target="_blank" rel="noopener noreferrer">
+                        GitHub
+                    </a>
+                    <a href="https://www.linkedin.com/in/nuno-mikael-nugroho-70b428380/" class="social-link" target="_blank" rel="noopener noreferrer">
+                        LinkedIn
+                    </a>
+                    <a href="mailto:nuno42.mikael@gmail.com" class="social-link">
+                        Email
+                    </a>
                 </div>
             </div>
-        </section>
-    </main>
 
-    <!-- FOOTER -->
-    <footer class="site-footer">
-        <div class="container">
-            <p>
-                &copy; 2026 {{ name }}.
-                Fakultas Ilmu Komputer, Universitas Indonesia.
-            </p>
         </div>
-    </footer>
+    </section>
 
-</body>
-</html>
+    <!-- SKILLS -->
+    <section class="skills" id="skills">
+        <div class="container">
+            <h2>Skills</h2>
+            <p>
+                Abilities and languages I'm proficient in that I acquired through my 
+                experiences in programming, filmmaking, and other creative endeavors.
+            </p>
+
+            <div class="skills-pills">
+                <span class="pill">
+                    <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/3840px-Python-logo-notext.svg.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail" class="pill-icon" alt="">
+                    Python
+                </span>
+                <span class="pill">
+                    <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/1/18/ISO_C%2B%2B_Logo.svg/330px-ISO_C%2B%2B_Logo.svg.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail&_=20170928190710" class="pill-icon" alt="">
+                    C++
+                </span>
+                <span class="pill">
+                    <img src="https://cdn-icons-png.flaticon.com/512/5968/5968282.png" class="pill-icon" alt="">
+                    Java
+                </span>
+                <span class="pill">
+                    <img src="https://cdn-icons-png.flaticon.com/512/5968/5968267.png" class="pill-icon" alt="">
+                    HTML
+                </span>
+                <span class="pill">
+                    <img src="https://cdn-icons-png.flaticon.com/512/5968/5968242.png" class="pill-icon" alt="">
+                    CSS
+                </span>
+                <span class="pill">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original" class="pill-icon" alt="">
+                    JavaScript
+                </span>
+                <span class="pill">🎬 Directing</span>
+                <span class="pill">✍️ Creative Writing</span>
+                <span class="pill">🎥 Film Production</span>
+                <span class="pill">🔍 Research</span>
+                <span class="pill">🗣️ Public Speaking</span>
+                <span class="pill">
+                    <img src="https://flagcdn.com/24x18/id.png" class="pill-icon" alt="">
+                    Bahasa Indonesia
+                </span>
+                <span class="pill">
+                    <img src="https://flagcdn.com/24x18/gb.png" class="pill-icon" alt="">
+                    English
+                </span>
+                <span class="pill">
+                    <img src="https://static.canva.com/static/images/favicon.ico" class="pill-icon" alt="">
+                    Canva
+                </span>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock content %}
