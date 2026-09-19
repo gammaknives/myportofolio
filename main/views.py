@@ -66,7 +66,7 @@ def create_project(request):
 
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, "Proyek baru berhasil ditambahkan!")
+        messages.success(request, "New project successfully added!")
         return redirect("main:show_project")
 
     context = {
@@ -80,7 +80,23 @@ def delete_project(request, project_id):
 
     if request.method == "POST":
         project.delete()
-        messages.success(request, "Project berhasil dihapus!")
+        messages.success(request, "Project successfully deleted!")
         return redirect("main:show_project")
 
     return redirect("main:show_project")
+
+def update_project(request, project_id):
+    project = get_object_or_404(Project, pk=project_id)
+    form = ProjectForm(request.POST or None, instance=project)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Project successfully updated!")
+        return redirect("main:show_project")
+
+    context = {
+        "name": "Nuno",
+        "form": form,
+        "project": project,
+    }
+    return render(request, "projects_form.html", context)

@@ -13,8 +13,8 @@ html {
     --ink: #1c1917;
     --paper: #4dcdec;
     --accent: #d95d39;
-    --accent-dark: #a8442a;
-    --line: #d41b1b;
+    --accent-dark: #d5411c;
+    --line: #e61b1b;
     --text-muted: #3e3d3d;
     --radius: 4px;
 }
@@ -791,4 +791,11 @@ h3,
         width: 100%;
         text-align: center;
     }
+}
+
+.project-edit-link {
+    margin-top: 0.75rem;
+    margin-right: 0.5rem;
+    display: inline-block;
+    text-decoration: none;
 }

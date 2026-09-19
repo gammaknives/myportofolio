@@ -16,11 +16,11 @@ class ProjectForm(ModelForm):
         ]
 
         labels = {
-            "title": "Nama Proyek",
-            "description": "Deskripsi Proyek",
-            "tags": "Tag (pisahkan dengan koma)",
-            "thumbnail": "URL Gambar Proyek",
-            "link": "URL Proyek",
+            "title": "Project Name",
+            "description": "Project Description",
+            "tags": "Tags (comma-separated)",
+            "thumbnail": "Project Image URL",
+            "link": "Project URL",
         }
 
         widgets = {
@@ -29,11 +29,11 @@ class ProjectForm(ModelForm):
                 "maxlength": 255,
             }),
             "description": Textarea(attrs={
-                "placeholder": "Ceritakan proyekmu",
+                "placeholder": "A short description of your project",
                 "rows": 3,
             }),
             "tags": TextInput(attrs={
-                "placeholder": "Film, Directing, Scriptwriting",
+                "placeholder": "Research, Film, Hardware",
             }),
             "thumbnail": URLInput(attrs={
                 "placeholder": "https://raw.githubusercontent.com/...",
