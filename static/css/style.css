@@ -22,7 +22,7 @@ html {
 body {
     font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     color: var(--ink);
-    background: linear-gradient(135deg,var(--paper), #3457d8);
+    background: linear-gradient(135deg,var(--paper), #4165e7);
     background-attachment: fixed;
     line-height: 1.6;
     min-height: 100vh;
@@ -631,6 +631,24 @@ h3,
     font-weight: 600;
 }
 
+.project-cta {
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--paper);
+    background-color: var(--ink);
+    border-radius: var(--radius);
+    padding: 0.45rem 1rem;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.project-cta:hover {
+    background-color: var(--accent);
+    color: var(--paper);
+    transform: translateY(-2px);
+}
+
 .project-form {
     width: 100%;
     max-width: 600px;
@@ -672,17 +690,24 @@ h3,
 }
 
 .project-delete-trigger {
-    margin-top: 0.75rem;
-    background-color: transparent;
-    border: 2px solid #b42318;
-    color: #b42318;
+    display: inline-block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: red;
+    background: none;
+    border: none;
+    padding: 0;
+    margin-top: 0;
+    text-decoration: none;
     cursor: pointer;
-    font: inherit;
+    font-family: inherit;
+    transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .project-delete-trigger:hover {
-    background-color: #b42318;
     color: white;
+    transform: translateX(3px);
+    background: none;
 }
 
 .project-delete-modal {
@@ -794,8 +819,23 @@ h3,
 }
 
 .project-edit-link {
-    margin-top: 0.75rem;
-    margin-right: 0.5rem;
     display: inline-block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: blue;
     text-decoration: none;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.project-edit-link:hover {
+    color: white;
+    transform: translateX(3px);
+}
+
+.project-actions-row {
+    display: flex;
+    gap: 1.25rem;
+    align-items: center;
+    margin-top: 0.75rem;
+    flex-wrap: wrap;
 }

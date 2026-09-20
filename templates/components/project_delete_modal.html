@@ -1,14 +1,16 @@
-<a href="{% url 'main:update_project' project.id %}" class="project-cta project-edit-link">
-    Edit Project
-</a>
+<div class="project-actions-row">
+    <a href="{% url 'main:update_project' project.id %}" class="project-edit-link">
+        Edit Project
+    </a>
 
-<button type="button"
-        class="project-cta project-delete-trigger"
-        popovertarget="delete-project-{{ project.id }}"
-        aria-label="Hapus {{ project.title }}"
-        title="Hapus proyek">
-    Delete Project
-</button>
+    <button type="button"
+            class="project-delete-trigger"
+            popovertarget="delete-project-{{ project.id }}"
+            aria-label="Delete {{ project.title }}"
+            title="Delete project">
+        Delete Project
+    </button>
+</div>
 
 <div id="delete-project-{{ project.id }}"
      class="project-delete-modal"
@@ -20,16 +22,16 @@
             class="project-delete-modal__backdrop"
             popovertarget="delete-project-{{ project.id }}"
             popovertargetaction="hide"
-            aria-label="Tutup konfirmasi hapus"></button>
+            aria-label="Close delete confirmation"></button>
     <div class="project-delete-modal__content">
         <button type="button"
                 class="project-delete-modal__close"
                 popovertarget="delete-project-{{ project.id }}"
                 popovertargetaction="hide"
-                aria-label="Tutup konfirmasi hapus">×</button>
+                aria-label="Close delete confirmation">×</button>
         <h2 id="delete-project-title-{{ project.id }}">Delete Project?</h2>
         <p>
-            Are you sure you want to delete the project <strong>{{ project.title }}</strong>?
+            Are you sure you want to delete
             <strong>{{ project.title }}</strong>?
         </p>
         <div class="project-delete-modal__actions">
