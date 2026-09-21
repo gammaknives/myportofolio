@@ -839,3 +839,13 @@ h3,
     margin-top: 0.75rem;
     flex-wrap: wrap;
 }
+
+.login-hint {
+    background-color: rgba(255, 255, 255, 0.5);
+    border: 2px dashed var(--ink);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}

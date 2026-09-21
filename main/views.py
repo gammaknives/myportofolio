@@ -10,6 +10,7 @@ from django.db.models import Q
 from django.contrib import messages
 from django.core import serializers
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 
 
 def show_main(request):
@@ -61,6 +62,7 @@ def show_project(request):
     }
     return render(request, "projects.html", context)
 
+@login_required(login_url="main:login")
 def create_project(request):
     form = ProjectForm(request.POST or None)
 
@@ -75,6 +77,7 @@ def create_project(request):
     }
     return render(request, "projects_form.html", context)
 
+@login_required(login_url="main:login")
 def delete_project(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
 
@@ -85,6 +88,7 @@ def delete_project(request, project_id):
 
     return redirect("main:show_project")
 
+@login_required(login_url="main:login")
 def update_project(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
     form = ProjectForm(request.POST or None, instance=project)
@@ -101,6 +105,7 @@ def update_project(request, project_id):
     }
     return render(request, "projects_form.html", context)
 
+@login_required(login_url="main:login")
 def create_experience(request):
     form = ExperienceForm(request.POST or None)
 
@@ -115,6 +120,7 @@ def create_experience(request):
     }
     return render(request, "experiences_form.html", context)
 
+@login_required(login_url="main:login")
 def update_experience(request, experience_id):
     experience = get_object_or_404(Experience, pk=experience_id)
     form = ExperienceForm(request.POST or None, instance=experience)
@@ -131,6 +137,7 @@ def update_experience(request, experience_id):
     }
     return render(request, "experiences_form.html", context)
 
+@login_required(login_url="main:login")
 def delete_experience(request, experience_id):
     experience = get_object_or_404(Experience, pk=experience_id)
 
