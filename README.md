@@ -125,3 +125,99 @@ S1 Ilmu Komputer, Fakultas Ilmu Komputer, Universitas Indonesia
 
 ## Lisensi
 Proyek ini dibuat untuk keperluan akademik sebagai bagian dari perkuliahan di Universitas Indonesia.
+
+# Website Portofolio Nuno Mikael Nugroho
+
+## Gambaran Umum
+Website portofolio pribadi yang dibuat untuk mata kuliah Pemrograman Berbasis Platform, menampilkan latar belakang, keahlian, pengalaman, dan proyek saya sebagai mahasiswa Ilmu Komputer di Universitas Indonesia. Awalnya dibangun sebagai situs statis untuk Tugas Individu 1, kemudian dikembangkan menjadi aplikasi Django dinamis menggunakan pola Model-View-Template (MVT) untuk Tugas Individu 2, dan dilengkapi dengan fitur Create/Update/Delete, data delivery dalam format JSON, serta autentikasi untuk Tugas Individu 3.
+
+## Fitur
+- **Tata letak responsif**
+    menyesuaikan dari tampilan desktop ke mobile menggunakan CSS Grid dan media queries
+- **Header navigasi sticky**
+    dengan smooth scroll ke bagian-bagian halaman
+- **Halaman Experience dinamis**
+    mengambil data dari model `Experience`, menampilkan peran, kategori, dan status masih berlangsung/selesai
+- **Halaman Projects dinamis**
+    mengambil data dari model `Project`, dengan tata letak teks/gambar yang berselang-seling di setiap proyek untuk ritme visual
+- **Create, Update, dan Delete**
+    baik untuk Project maupun Experience, menggunakan `ModelForm` dan dilindungi login (`@login_required`)
+- **Data delivery dalam format JSON**
+    endpoint `/api/project/` mengembalikan data proyek dalam format JSON, dan halaman Projects mengambil datanya melalui proses serialization/deserialization
+- **Kolom pencarian proyek**
+    memfilter proyek berdasarkan judul, deskripsi, atau tag menggunakan `Q` objects dari Django dan parameter query `GET` — tanpa JavaScript
+- **Lightbox penampil gambar**
+    klik gambar proyek mana pun untuk melihatnya secara penuh, dibuat dengan CSS murni (selector `:target`, tanpa JavaScript)
+- **Skills section**
+    dengan pill berlabel ikon, dikelompokkan secara visual berdasarkan kategori
+- **Latar belakang CSS kustom untuk header, body, dan footer**
+    latar belakang gambar/tekstur untuk header dan footer, latar belakang gradasi warna untuk body
+
+## Tech Stack
+- **Django**
+    framework backend yang menangani routing, view, model, form, autentikasi, dan template (pola MVT)
+- **HTML5**
+    elemen semantik (`<header>`, `<nav>`, `<main>`, `<section>`, `<footer>`), template inheritance dengan `base.html`
+- **CSS3** 
+    Grid layout, custom properties (CSS variables), media queries, `:target` untuk interaktivitas
+- **Google Fonts**
+    Space Grotesk
+
+Tidak ada JavaScript yang digunakan dalam proyek ini. Seluruh interaktivitas dicapai melalui logika sisi server Django yang dikombinasikan dengan teknik HTML/CSS murni.
+
+## Reflection  Tugas 1
+1.  Yes, I used semantic HTML5 elements, specifically `<header>`, `<nav>`, `<main>`, `<section>`, and `<footer>`. I
+    used`<section>` three times to group content thematically (profile, skills, and projects) each with an `id` used as an anchor target for navigation.
+
+    `<article>` was not used, since none of the content is meant to be independently distributable outside the page. Each section is a dependent part of a single cohesive page rather than standalone syndicated content.
+    `<aside>` was also not used, as all content presented (profile info, skills, and projects) is primary and directly relevant to the portfolio's purpose. There was no supplementary content I wanted to add to warrant using `<aside>`
+
+2. The main challenge in building a responsive layout was reworking elements that are arranged side-by-side on desktop into a
+    stacked layout on mobile, without breaking the logical reading order. For example, the hero photo is positioned beside the identity / details text on desktop via `grid-template-areas` but needed a deliberate reordering on mobile so it sits between the identity and details sections rather than in a confusing position. A similar challenge appeared in the projects section, where the desktop layout alternates text-left / image-right and image-left / text-right per project; this alternation doesn't translate meaningfully to a single-column mobile layout, so all project rows were unified into one consistent stacking order on mobile. Element sizing for certain images was also adjusted for smaller viewports.
+    
+    The general evaluation principle used was elements arranged horizontally on desktop were converted to vertical stacking on mobile, since horizontal space becomes too narrow to preserve readability. I tested it using the browser DevTools' Device Toolbar to verify layout behavior across breakpoints.
+
+3. As a purely static site, a few limitations became apparent to me while trying to present content optimally:
+    - Image lightbox
+        Implemented using the CSS `:target` selector, which works but has real limitations, such as not being able to be closed by clicking outside the image or pressing escape.
+    - No project filtering
+        Project tags (Film, Hardware, Research, etc.) are currently static labels with no interactive behavior, so visitors can't filter or sort projects by category despite the growing variety.
+    - Manual project markup
+        Each new project requires manually copying and pasting an entire `project-row` HTML block, making the codebase repetitive and harder to maintain as more projects are added.
+
+    Plans I have for dynamic functionality in the next iteration:
+    - A proper JavaScript-based modal (closable via outside click or escape key) to replace the CSS-only lightbox
+    - Interactive tag-based filtering for the projects section
+    - A data-driven rendering approach for the projects section
+
+## Refleksi Tugas 2
+1. Ketika pengguna membuka halaman portofolio baru,misalnya project, alurnya dimulai dari permintaan HTTP yang dikirim browser ke server Django. Permintaan ini pertama kali diterima oleh `urls.py` proyek (`myportofolio/urls.py`), yang bertindak sebagai titik masuk utama dan mendelegasikan permintaan ke aplikasi yang sesuai menggunakan `include()`. Selanjutnya, `urls.py` aplikasi (`main/urls.py`) mencocokkan path URL (misalnya `project/`) dengan salah satu `path()` yang terdaftar, lalu memanggil fungsi view yang dipetakan ke path tersebut, yaitu `show_project`. Di dalam view, Django mengambil data yang dibutuhkan dari model (misalnya `Project.objects.all()`, atau hasil yang sudah difilter jika ada parameter pencarian), memasukkannya ke dalam sebuah `context` berupa dictionary. View kemudian memanggil `render()`, yang menggabungkan data pada `context` tersebut dengan template (`projects.html`) menggunakan Django Template Language. Di sinilah data dari model benar-benar disisipkan ke dalam struktur HTML melalui tag seperti `{{ project.title }}` atau perulangan `{% for project in project_list %}`. Hasil akhir berupa HTML yang sudah lengkap dengan data dikirim kembali sebagai response HTTP ke browser, yang kemudian merender halaman tersebut untuk ditampilkan kepada pengguna.
+
+2. Data untuk bagian portofolio baru sebaiknya disimpan pada model, bukan ditulis langsung di dalam template, karena model merepresentasikan sumber data tunggal yang terstruktur dan dapat diolah secara dinamis, sedangkan template seharusnya hanya bertugas menampilkan data, bukan menyimpannya. Jika data ditulis langsung (hardcoded) di template, setiap perubahan sekecil apa pun, misalnya menambah proyek baru atau memperbaiki deskripsi, mengharuskan saya mengedit file HTML secara manual, yang rentan terhadap kesalahan dan sulit diskalakan seiring bertambahnya jumlah data. Dengan menyimpan data pada model, saya bisa menambah, mengubah, atau menghapus data melalui Django Admin atau shell tanpa perlu menyentuh kode template maupun view sama sekali. Hal ini juga membuka kemungkinan fitur dinamis seperti pencarian dan filter, karena data dapat di-query dan diolah secara terprogram (misalnya menggunakan `Q` objects), sesuatu yang mustahil dilakukan jika data hanya berupa teks statis di HTML. Secara keseluruhan, pemisahan ini membuat aplikasi jauh lebih mudah dipelihara dan dikembangkan, karena perubahan data dan perubahan tampilan bisa dilakukan secara independen satu sama lain.
+
+3. `makemigrations` dan `migrate` adalah dua perintah yang saling melengkapi namun memiliki fungsi berbeda dalam siklus perubahan model Django. `makemigrations` bertugas membaca perubahan yang dibuat pada model (misalnya penambahan field baru, perubahan tipe data, atau penghapusan field) dan menghasilkan file migrasi yang berisi instruksi perubahan tersebut dalam format yang bisa dibaca Django, tetapi perintah ini belum benar-benar mengubah apa pun di database. Sementara itu, `migrate` bertugas menerapkan file migrasi yang sudah dibuat tersebut ke database sesungguhnya, sehingga struktur tabel di database benar-benar berubah sesuai dengan definisi model terbaru.
+
+Contoh nyata dari proyek saya sendiri adalah ketika saya mengubah field `started_at` pada model `Experience` dari `models.DateTimeField(auto_now_add=True)` menjadi `models.DateTimeField()` biasa, agar saya bisa mengisi tanggal mulai secara manual alih-alih otomatis diisi tanggal saat data dibuat. Setelah mengubah baris kode tersebut di `models.py`, saya perlu menjalankan `python manage.py makemigrations` agar Django mendeteksi perubahan pada field tersebut dan membuat file migrasi baru yang mencatat perubahan ini. Setelah itu, saya menjalankan `python manage.py migrate` agar perubahan tersebut benar-benar diterapkan ke database, sehingga kolom `started_at` pada tabel `Experience` tidak lagi otomatis terisi dan siap menerima nilai tanggal yang saya tentukan sendiri melalui shell.
+
+## Refleksi — Tugas 3
+1. Saya menggunakan `ModelForm` alih-alih membuat form HTML secara manual karena `ModelForm` secara otomatis membangun struktur form berdasarkan definisi model yang sudah ada, termasuk field, tipe data, serta validasi bawaan (misalnya memastikan `URLField` benar-benar berisi URL yang valid, atau field wajib tidak boleh kosong). Ini membuat kode jauh lebih ringkas dan konsisten, karena saya tidak perlu menulis ulang setiap `<input>` beserta validasinya secara manual di HTML maupun di view — cukup mendefinisikan `fields`, `labels`, dan `widgets` pada satu class, dan Django akan menghasilkan elemen form yang sesuai secara otomatis. Selain itu, jika model berubah (misalnya menambah field baru), form yang menggunakan `ModelForm` dapat langsung menyesuaikan tanpa saya harus mengubah banyak kode HTML secara manual.
+Kita diwajibkan menambahkan `{% csrf_token %}` pada form karena Django menerapkan proteksi CSRF (Cross-Site Request Forgery) secara default untuk semua permintaan `POST`. Tanpa token ini, Django akan menolak permintaan form dengan error 403 Forbidden, sebab CSRF token memastikan bahwa permintaan yang dikirim benar-benar berasal dari halaman/form milik aplikasi itu sendiri, bukan dari situs lain yang mencoba menyamar mengirimkan request atas nama pengguna yang sedang login tanpa sepengetahuan mereka. Token ini bersifat unik dan rahasia untuk setiap sesi, sehingga penyerang dari luar tidak dapat memalsukannya.
+
+2. JSON lebih disukai dibandingkan XML dalam pengembangan aplikasi web modern karena beberapa alasan. Pertama, struktur JSON jauh lebih ringkas karena tidak memerlukan tag pembuka dan penutup seperti XML, sehingga ukuran data yang dikirim lebih kecil dan lebih hemat bandwidth, terutama penting untuk aplikasi web modern yang sering melakukan banyak request kecil secara berulang (misalnya lewat AJAX atau API). Kedua, JSON memiliki kemiripan struktur langsung dengan objek pada JavaScript, sehingga browser/frontend dapat langsung mem-parsing dan menggunakan data JSON tanpa proses konversi tambahan yang rumit, sementara XML membutuhkan parser terpisah yang umumnya lebih berat. Ketiga, JSON lebih mudah dibaca oleh manusia dibandingkan XML yang penuh dengan tag berulang, sehingga proses debugging menjadi lebih cepat. Karena alasan-alasan tersebut, hampir seluruh REST API modern (termasuk yang saya buat pada proyek ini) menggunakan JSON sebagai format utama untuk pertukaran data antara server dan client.
+
+3. Alur yang terjadi saat fungsi view mengembalikan data portofolio dalam bentuk JSON dimulai ketika client (misalnya browser, atau fungsi `show_project` saya sendiri) mengirimkan request ke endpoint tertentu, dalam proyek ini `/api/project/`. Request tersebut diarahkan ke fungsi view `get_project_json`, yang kemudian mengambil data dari database melalui model menggunakan query seperti `Project.objects.all()` atau hasil yang sudah difilter berdasarkan parameter pencarian. Data yang diambil ini masih berupa QuerySet berisi objek-objek model Django, yang tidak bisa langsung dikirim sebagai response HTTP, karena format tersebut spesifik untuk Python/Django dan tidak dapat dipahami oleh client lain (browser, aplikasi mobile, atau sistem lain) yang hanya memahami format data universal seperti teks. Di sinilah proses serialization diperlukan — yaitu mengonversi objek model Django menjadi format string/teks terstruktur (dalam kasus ini JSON) menggunakan `serializers.serialize("json", projects)`. Hasil dari serialization tersebut kemudian dikirim kembali ke client sebagai `HttpResponse` dengan `content_type="application/json"`. Jika kita ingin menampilkan kembali data tersebut ke sebuah halaman HTML (seperti yang saya lakukan pada `show_project`), maka data JSON tersebut perlu di-deserialize kembali menjadi objek model Django menggunakan `serializers.deserialize(...)`, sehingga saya dapat memanggil method dan atribut model seperti biasa (misalnya `project.get_tags()`) sebelum dikirim ke template melalui `context`.
+
+## AI Disclosure
+Saya menggunakan AI terutama untuk dua hal: brainstorming dan memperbaiki bug. Saat saya bingung mengenai apa yang harus ditambahkan agar situs web lebih menarik, saya meminta ide dari chatbot AI seperti Gemini milik Google dan Claude. Salah satu contohnya adalah pada fitur tambahan. Saya awalnya tidak memiliki ide baik dan ingin melakukan sesuatu seperti dark mode karena beberapa teman saya juga menambahkan fitur tersebut. Tapi, fitur itu tidak terlalu berguna menurut saya karena hanya fitur visual yang tidak membantu fungsionalitas situsnya. Saya meminta ide kepada Claude dan akhirnya saya memilih untuk membuat sebuah login system untuk create, edit, dan delete projects maupun experiences. Ini fitur yang lebih bermakna dan membantu saya belajar hal-hal baru.
+Berikut adalah prompt yang saya gunakan:
+"What feature could I add for this assignment? I kinda wanna add dark mode but it seems kinda disconnected and useless. Maybe something to do with the creation/deletion part of projects and experiences?"
+Selain untuk bertukar pikiran, saya menggunakan AI saat mengalami kendala dengan bug, untuk merapikan kode yang berantakan, serta menambahkan komentar agar kode lebih mudah dipahami. Meskipun menggunakan AI, saya selalu memeriksa ulang kodenya dan tidak sekadar copy paste, melainkan juga melakukan penyesuaian dan perubahan sendiri. Hal ini karena AI umumnya tidak memahami cara membuat tampilan visual yang menarik bagi manusia. Jadi, saya menggunakan kode dari AI sebagai kerangka dasar yang kemudian saya modifikasi sendiri, biasanya terkait warna, ukuran, dan tingkat kecerahan. Karena tugas ini melibatkan pembuatan situs web, AI tidak bisa melihat langsung seperti apa hasil akhirnya, sehingga AI mungkin tidak menyadari bahwa kode yang dihasilkannya bisa membuat tampilan situs menjadi berantakan atau kurang menarik.
+
+## Author
+**Nuno Mikael Nugroho**
+NPM: 2506624865
+Class: PBP D
+S1 Ilmu Komputer, Fakultas Ilmu Komputer, Universitas Indonesia
+
+## License
+This project is created for academic purposes as part of coursework at Universitas Indonesia.

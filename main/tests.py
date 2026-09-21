@@ -8,6 +8,7 @@ from main.models import Experience, Project
 
 class MainTest(TestCase):
     def setUp(self):
+        Experience.objects.all().delete()
         self.experience = Experience.objects.create(
             title="Gonzaga Festival Short Movie Competition Committee",
             description="Helped in planning and managing the competition from start to finish",
@@ -61,6 +62,7 @@ class MainTest(TestCase):
 
 class ProjectTest(TestCase):
     def setUp(self):
+        Project.objects.all().delete()
         self.project = Project.objects.create(
             title="Boneka Bayangan",
             description="A short movie about a boy who loves to play with wayang (shadow puppets)",
@@ -94,7 +96,7 @@ class ProjectTest(TestCase):
         Project.objects.all().delete()
         response = self.client.get(reverse("main:show_project"))
 
-        self.assertContains(response, "Belum ada proyek yang ditambahkan.")
+        self.assertContains(response, "No projects added yet.")
 
     def test_project_without_link_has_no_view_project_button(self):
         Project.objects.all().delete()
