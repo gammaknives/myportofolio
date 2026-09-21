@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from main.models import Experience
 
 from main.models import Project
-from main.forms import ProjectForm
+from main.forms import ProjectForm, ExperienceForm
 from django.db.models import Q
 
 
@@ -100,3 +100,43 @@ def update_project(request, project_id):
         "project": project,
     }
     return render(request, "projects_form.html", context)
+
+def create_experience(request):
+    form = ExperienceForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "New experience successfully added!")
+        return redirect("main:show_experience")
+
+    context = {
+        "name": "Nuno",
+        "form": form,
+    }
+    return render(request, "experiences_form.html", context)
+
+def update_experience(request, experience_id):
+    experience = get_object_or_404(Experience, pk=experience_id)
+    form = ExperienceForm(request.POST or None, instance=experience)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Experience successfully updated!")
+        return redirect("main:show_experience")
+
+    context = {
+        "name": "Nuno",
+        "form": form,
+        "experience": experience,
+    }
+    return render(request, "experiences_form.html", context)
+
+def delete_experience(request, experience_id):
+    experience = get_object_or_404(Experience, pk=experience_id)
+
+    if request.method == "POST":
+        experience.delete()
+        messages.success(request, "Experience successfully deleted!")
+        return redirect("main:show_experience")
+
+    return redirect("main:show_experience")
