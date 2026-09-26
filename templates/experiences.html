@@ -8,8 +8,16 @@
         <div class="container">
             <p class="section-kicker">My journey until now</p>
             <h1>Experience</h1>
-            <a href="{% url 'main:create_experience' %}" class="project-cta">+ Add Experience</a>
-            <br><br>
+
+            {% for message in messages %}
+                <p class="form-message{% if message.tags == 'error' %} error{% endif %}">{{ message }}</p>
+            {% endfor %}
+
+             {% if user.is_staff %}
+                <a href="{% url 'main:create_experience' %}" class="project-cta">+ Add Experience</a>
+                <br><br>
+            {% endif %}
+
             <div class="experience-grid">
                 {% for experience in experience_list %}
                     <article class="experience-card">
@@ -26,7 +34,9 @@
                         {% else %}
                             <p class="experience-status">{{ experience.ended_at|date:"Y" }}</p>
                         {% endif %}
-                        {% include "components/experience_delete_modal.html" with experience=experience %}
+                        {% if user.is_staff %}
+                            {% include "components/experience_delete_modal.html" with experience=experience %}
+                        {% endif %}
                     </article>
                 {% empty %}
                     <p class="empty-state">

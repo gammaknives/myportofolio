@@ -8,8 +8,14 @@
         <div class="container">
             <h2>Projects</h2>
 
-            <a href="{% url 'main:create_project' %}" class="project-cta">+ Add Project</a>
-            <br><br>
+            {% for message in messages %}
+                <p class="form-message{% if message.tags == 'error' %} error{% endif %}">{{ message }}</p>
+            {% endfor %}
+            
+            {% if user.is_staff %}
+                <a href="{% url 'main:create_project' %}" class="project-cta">+ Add Project</a>
+                <br><br>
+            {% endif %}
 
             <form method="get" class="project-search" action="{% url 'main:show_project' %}">
                 <input
@@ -52,8 +58,12 @@
                             </a>
                             <br>
                         {% endif %}
+                        
+                        {% include "components/project_star.html" with project=project %}
 
-                        {% include "components/project_delete_modal.html" with project=project %}
+                        {% if user.is_staff %}
+                            {% include "components/project_delete_modal.html" with project=project %}
+                        {% endif %}
                     </div>
 
                     {% if project.thumbnail %}

@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 
 from main.models import Experience
-
 from main.models import Project
 from main.forms import ProjectForm, ExperienceForm
 from django.db.models import Q
@@ -10,10 +9,16 @@ from django.db.models import Q
 from django.contrib import messages
 from django.core import serializers
 from django.http import HttpResponse
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from functools import wraps
+
+import datetime
 
 
 def show_main(request):
+    last_login = request.COOKIES.get("last_login", "No login session yet")
     context = {
         "name": "Nuno",
         "full_name": "Nuno Mikael Nugroho",
@@ -23,6 +28,7 @@ def show_main(request):
             "CS Student at Universitas Indonesia fighting to survive. "
             "I like watching movies, listening to music, and playing video games."
         ),
+        "last_login": last_login,
     }
     return render(request, "index.html", context)
 
@@ -45,7 +51,7 @@ def get_project_json(request):
             Q(tags__icontains=query)
         )
 
-    projects_json = serializers.serialize("json", projects)
+    projects_json = serializers.serialize("json", projects, use_natural_foreign_keys=True)
     return HttpResponse(projects_json, content_type="application/json")
 
 def show_project(request):
@@ -62,7 +68,20 @@ def show_project(request):
     }
     return render(request, "projects.html", context)
 
-@login_required(login_url="main:login")
+def staff_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect("main:login")
+        if not request.user.is_staff:
+            messages.error(request, "You don't have permission to do that. Log in as an admin to access this feature.")
+            if "experience" in view_func.__name__:
+                return redirect("main:show_experience")
+            return redirect("main:show_project")
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+@staff_required
 def create_project(request):
     form = ProjectForm(request.POST or None)
 
@@ -77,7 +96,7 @@ def create_project(request):
     }
     return render(request, "projects_form.html", context)
 
-@login_required(login_url="main:login")
+@staff_required
 def delete_project(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
 
@@ -88,7 +107,7 @@ def delete_project(request, project_id):
 
     return redirect("main:show_project")
 
-@login_required(login_url="main:login")
+@staff_required
 def update_project(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
     form = ProjectForm(request.POST or None, instance=project)
@@ -105,7 +124,7 @@ def update_project(request, project_id):
     }
     return render(request, "projects_form.html", context)
 
-@login_required(login_url="main:login")
+@staff_required
 def create_experience(request):
     form = ExperienceForm(request.POST or None)
 
@@ -120,7 +139,7 @@ def create_experience(request):
     }
     return render(request, "experiences_form.html", context)
 
-@login_required(login_url="main:login")
+@staff_required
 def update_experience(request, experience_id):
     experience = get_object_or_404(Experience, pk=experience_id)
     form = ExperienceForm(request.POST or None, instance=experience)
@@ -137,7 +156,7 @@ def update_experience(request, experience_id):
     }
     return render(request, "experiences_form.html", context)
 
-@login_required(login_url="main:login")
+@staff_required
 def delete_experience(request, experience_id):
     experience = get_object_or_404(Experience, pk=experience_id)
 
@@ -147,3 +166,52 @@ def delete_experience(request, experience_id):
         return redirect("main:show_experience")
 
     return redirect("main:show_experience")
+
+def register(request):
+    form = UserCreationForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Account created successfully. Please log in.")
+        return redirect("main:login")
+
+    context = {
+        "name": "Nuno",
+        "form": form,
+    }
+    return render(request, "register.html", context)
+
+def login_user(request):
+    form = AuthenticationForm(request, data=request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        user = form.get_user()
+        login(request, user)
+        response = redirect("main:show_main")
+        response.set_cookie("last_login", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        return response
+
+    context = {
+        "name": "Nuno",
+        "form": form,
+    }
+    return render(request, "login.html", context)
+
+
+def logout_user(request):
+    logout(request)
+    response = redirect("main:show_main")
+    response.delete_cookie("last_login")
+    return response
+
+@login_required(login_url="main:login")
+def toggle_star(request, project_id):
+    project = get_object_or_404(Project, pk=project_id)
+
+    if request.method == "POST":
+        if request.user in project.starred_by.all():
+            project.starred_by.remove(request.user)
+        else:
+            project.starred_by.add(request.user)
+
+    return redirect("main:show_project")
