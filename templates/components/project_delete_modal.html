@@ -3,15 +3,18 @@
         Edit Project
     </a>
 
-    <button type="button"
-            class="project-delete-trigger"
-            popovertarget="delete-project-{{ project.id }}"
-            aria-label="Delete {{ project.title }}"
-            title="Delete project">
-        Delete Project
-    </button>
+    {% if user.is_superuser %}
+        <button type="button"
+                class="project-delete-trigger"
+                popovertarget="delete-project-{{ project.id }}"
+                aria-label="Delete {{ project.title }}"
+                title="Delete project">
+            Delete Project
+        </button>
+    {% endif %}
 </div>
 
+{% if user.is_superuser %}
 <div id="delete-project-{{ project.id }}"
      class="project-delete-modal"
      popover="auto"
@@ -46,3 +49,4 @@
         </div>
     </div>
 </div>
+{% endif %}

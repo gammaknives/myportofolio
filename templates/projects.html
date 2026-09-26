@@ -12,7 +12,7 @@
                 <p class="form-message{% if message.tags == 'error' %} error{% endif %}">{{ message }}</p>
             {% endfor %}
             
-            {% if user.is_staff %}
+            {% if user.is_superuser %}
                 <a href="{% url 'main:create_project' %}" class="project-cta">+ Add Project</a>
                 <br><br>
             {% endif %}
@@ -61,7 +61,7 @@
                         
                         {% include "components/project_star.html" with project=project %}
 
-                        {% if user.is_staff %}
+                        {% if user.is_superuser or is_editor %}
                             {% include "components/project_delete_modal.html" with project=project %}
                         {% endif %}
                     </div>

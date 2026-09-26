@@ -9,10 +9,11 @@ from django.db.models import Q
 from django.contrib import messages
 from django.core import serializers
 from django.http import HttpResponse
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from functools import wraps
+from django.core.exceptions import PermissionDenied
 
 import datetime
 
@@ -60,28 +61,39 @@ def show_project(request):
     json_response = get_project_json(request)
     projects = serializers.deserialize("json", json_response.content.decode("utf-8"))
     projects = [project.object for project in projects]
+    is_editor = request.user.is_authenticated and request.user.groups.filter(name="Editor").exists()
 
     context = {
         "name": "Nuno",
         "project_list": projects,
         "query": query,
+        "is_editor": is_editor,
     }
     return render(request, "projects.html", context)
 
-def staff_required(view_func):
+def owner_required(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated:
             return redirect("main:login")
-        if not request.user.is_staff:
-            messages.error(request, "You don't have permission to do that. Log in as an admin to access this feature.")
-            if "experience" in view_func.__name__:
-                return redirect("main:show_experience")
-            return redirect("main:show_project")
+        if not request.user.is_superuser:
+            raise PermissionDenied
         return view_func(request, *args, **kwargs)
     return wrapper
 
-@staff_required
+
+def owner_or_editor_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect("main:login")
+        is_editor = request.user.groups.filter(name="Editor").exists()
+        if not (request.user.is_superuser or is_editor):
+            raise PermissionDenied
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+@owner_required
 def create_project(request):
     form = ProjectForm(request.POST or None)
 
@@ -96,7 +108,7 @@ def create_project(request):
     }
     return render(request, "projects_form.html", context)
 
-@staff_required
+@owner_required
 def delete_project(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
 
@@ -107,7 +119,7 @@ def delete_project(request, project_id):
 
     return redirect("main:show_project")
 
-@staff_required
+@owner_or_editor_required
 def update_project(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
     form = ProjectForm(request.POST or None, instance=project)
@@ -124,7 +136,7 @@ def update_project(request, project_id):
     }
     return render(request, "projects_form.html", context)
 
-@staff_required
+@owner_required
 def create_experience(request):
     form = ExperienceForm(request.POST or None)
 
@@ -139,7 +151,7 @@ def create_experience(request):
     }
     return render(request, "experiences_form.html", context)
 
-@staff_required
+@owner_or_editor_required
 def update_experience(request, experience_id):
     experience = get_object_or_404(Experience, pk=experience_id)
     form = ExperienceForm(request.POST or None, instance=experience)
@@ -156,7 +168,7 @@ def update_experience(request, experience_id):
     }
     return render(request, "experiences_form.html", context)
 
-@staff_required
+@owner_required
 def delete_experience(request, experience_id):
     experience = get_object_or_404(Experience, pk=experience_id)
 
