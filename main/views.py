@@ -33,11 +33,13 @@ def show_main(request):
     }
     return render(request, "index.html", context)
 
-
 def show_experience(request):
+    is_editor = request.user.is_authenticated and request.user.groups.filter(name="Editor").exists()
+
     context = {
         "name": "Nuno",
         "experience_list": Experience.objects.all(),
+        "is_editor": is_editor,
     }
     return render(request, "experiences.html", context)
 

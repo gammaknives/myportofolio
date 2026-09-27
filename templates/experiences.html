@@ -13,7 +13,7 @@
                 <p class="form-message{% if message.tags == 'error' %} error{% endif %}">{{ message }}</p>
             {% endfor %}
 
-             {% if user.is_staff %}
+             {% if user.is_superuser %}
                 <a href="{% url 'main:create_experience' %}" class="project-cta">+ Add Experience</a>
                 <br><br>
             {% endif %}
@@ -34,7 +34,7 @@
                         {% else %}
                             <p class="experience-status">{{ experience.ended_at|date:"Y" }}</p>
                         {% endif %}
-                        {% if user.is_staff %}
+                        {% if user.is_superuser or is_editor %}
                             {% include "components/experience_delete_modal.html" with experience=experience %}
                         {% endif %}
                     </article>

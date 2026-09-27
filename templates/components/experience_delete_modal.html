@@ -3,6 +3,7 @@
         Edit
     </a>
 
+    {% if user.is_superuser %}
     <button type="button"
             class="project-delete-trigger"
             popovertarget="delete-experience-{{ experience.id }}"
@@ -10,8 +11,10 @@
             title="Delete experience">
         Delete
     </button>
+    {% endif %}
 </div>
 
+{% if user.is_superuser %}
 <div id="delete-experience-{{ experience.id }}"
      class="project-delete-modal"
      popover="auto"
@@ -46,3 +49,4 @@
         </div>
     </div>
 </div>
+{% endif %}

@@ -10,12 +10,10 @@ class MainTest(TestCase):
     def setUp(self):
         Experience.objects.all().delete()
         self.experience = Experience.objects.create(
-            title="Gonzaga Festival Short Movie Competition Committee",
-            description="Helped in planning and managing the competition from start to finish",
-            category="volunteer",
-            started_at=timezone.now(),
-        )
-
+        title="Gonzaga Festival Short Movie Competition Committee",
+        description="Helped in planning and managing the competition from start to finish",
+        category="volunteer",
+    )
     def test_main_url_is_accessible(self):
         response = self.client.get(reverse("main:show_main"))
 

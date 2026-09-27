@@ -50,8 +50,6 @@ class ExperienceForm(ModelForm):
             "title",
             "description",
             "category",
-            "thumbnail",
-            "started_at",
             "ended_at",
         ]
 
@@ -59,8 +57,6 @@ class ExperienceForm(ModelForm):
             "title": "Title",
             "description": "Description",
             "category": "Category",
-            "thumbnail": "Image URL",
-            "started_at": "Start Date",
             "ended_at": "End Date (leave blank if ongoing)",
         }
 
@@ -74,9 +70,5 @@ class ExperienceForm(ModelForm):
                 "rows": 3,
             }),
             "category": Select(),
-            "thumbnail": URLInput(attrs={
-                "placeholder": "https://raw.githubusercontent.com/...",
-            }),
-            "started_at": DateInput(attrs={"type": "date"}),
             "ended_at": DateInput(attrs={"type": "date"}),
         }
