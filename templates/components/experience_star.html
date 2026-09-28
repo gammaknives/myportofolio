@@ -1,0 +1,11 @@
+<form method="post" action="{% url 'main:toggle_star_experience' experience.id %}" class="star-form" data-star-form>
+    {% csrf_token %}
+    <button type="submit"
+            class="button-star{% if user in experience.starred_by.all %} is-starred{% endif %}"
+            data-star-button
+            title="{% if experience.starred_by.all %}Starred by {{ experience.starred_by.all|join:', ' }}{% else %}Be the first to star this{% endif %}">
+        <span aria-hidden="true">★</span>
+        <span data-star-label>{% if user in experience.starred_by.all %}Unstar{% else %}Star{% endif %}</span>
+        <span class="star-count" data-star-count>{{ experience.starred_by.count }}</span>
+    </button>
+</form>
