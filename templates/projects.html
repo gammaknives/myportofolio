@@ -11,83 +11,273 @@
             {% for message in messages %}
                 <p class="form-message{% if message.tags == 'error' %} error{% endif %}">{{ message }}</p>
             {% endfor %}
-            
+
             {% if user.is_superuser %}
-                <a href="{% url 'main:create_project' %}" class="project-cta">+ Add Project</a>
+                <button type="button" class="project-cta" popovertarget="add-project-modal">
+                    <span aria-hidden="true">+</span>
+                    Add Project
+                </button>
                 <br><br>
             {% endif %}
-
-            <form method="get" class="project-search" action="{% url 'main:show_project' %}">
+            <form id="project-search-form" class="project-search">
                 <input
-                    type="text"
+                    type="search"
+                    id="search-input"
                     name="q"
                     value="{{ query }}"
                     placeholder="Search projects by title, description, or tag..."
                     class="project-search-input"
                 >
                 <button type="submit" class="project-search-btn">Search</button>
-                {% if query %}
-                    <a href="{% url 'main:show_project' %}" class="project-search-clear">Clear</a>
-                {% endif %}
             </form>
 
-            {% if query %}
-                <p class="project-search-status">
-                    Showing results for "<strong>{{ query }}</strong>"
-                </p>
-            {% endif %}
+            <p class="project-search-status hide" id="search-status">
+                Showing results for "<strong id="search-status-query"></strong>"
+            </p>
 
             <br>
-            <br>
 
-            {% for project in project_list %}
-                <div class="project-row{% if forloop.counter|divisibleby:2 %} project-row-reverse{% endif %}">
-                    <div class="project-text">
-                        <h3>{{ project.title }}</h3>
-                        <p>{{ project.description }}</p>
-
-                        <div class="project-tags">
-                            {% for tag in project.get_tags %}
-                                <span class="tag">{{ tag }}</span>
-                            {% endfor %}
-                        </div>
-
-                        {% if project.link %}
-                            <a href="{{ project.link }}" class="project-link" target="_blank" rel="noopener noreferrer">
-                                View Project &rarr;
-                            </a>
-                            <br>
-                        {% endif %}
-                        
-                        {% include "components/project_star.html" with project=project %}
-
-                        {% if user.is_superuser or is_editor %}
-                            {% include "components/project_delete_modal.html" with project=project %}
-                        {% endif %}
-                    </div>
-
-                    {% if project.thumbnail %}
-                        <div class="project-photo">
-                            <div class="project-photo-block"></div>
-                            <a href="#img-modal-{{ forloop.counter }}">
-                                <img class="project-img" src="{{ project.thumbnail }}" alt="{{ project.title }}">
-                            </a>
-                            <div id="img-modal-{{ forloop.counter }}" class="lightbox-modal">
-                                <a href="#close" class="lightbox-close">&times;</a>
-                                <img class="lightbox-content" src="{{ project.thumbnail }}" alt="{{ project.title }} Full">
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
-            {% empty %}
-                {% if query %}
-                    <p class="empty-state">No projects found matching "{{ query }}".</p>
-                {% else %}
-                    <p class="empty-state">No projects added yet.</p>
-                {% endif %}
-            {% endfor %}
+            <div id="loading" class="hide"><p class="empty-state">Loading projects...</p></div>
+            <div id="error" class="hide"><p class="empty-state">Couldn't load projects. Please try again.</p></div>
+            <div id="empty" class="hide"><p class="empty-state">No projects found.</p></div>
+            <div id="grid" class="hide"></div>
 
         </div>
     </section>
 </main>
+
+{% if user.is_superuser %}
+    {% include "components/project_form_modal.html" %}
+{% endif %}
+
+<script>
+const BASE_PROJECTS_ENDPOINT = "{% url 'main:get_project_json' %}";
+const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
+const IS_EDITOR = "{{ is_editor|yesno:'true,false' }}" === "true";
+const SEARCH_DEBOUNCE_DELAY = 300;
+
+let projectsAbortController;
+let searchDebounceTimer;
+
+const loadingState = document.getElementById('loading');
+const errorState = document.getElementById('error');
+const emptyState = document.getElementById('empty');
+const gridContainer = document.getElementById('grid');
+const searchForm = document.getElementById('project-search-form');
+const searchInput = document.getElementById('search-input');
+const searchStatus = document.getElementById('search-status');
+const searchStatusQuery = document.getElementById('search-status-query');
+
+function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
+    loadingState.classList.toggle('hide', !showLoading);
+    errorState.classList.toggle('hide', !showError);
+    emptyState.classList.toggle('hide', !showEmpty);
+    gridContainer.classList.toggle('hide', !showGrid);
+}
+
+// Mengubah karakter khusus HTML menjadi entity agar ditampilkan sebagai teks
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+}
+
+function buildProjectCardElement(item, index) {
+    const project = item.fields;
+    const projectId = item.pk;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'project-row' + ((index + 1) % 2 === 0 ? ' project-row-reverse' : '');
+
+    const tags = (project.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+    const tagsHtml = tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('');
+
+    const linkHtml = project.link
+        ? `<a href="${escapeHtml(project.link)}" class="project-link" target="_blank" rel="noopener noreferrer">View Project &rarr;</a><br>`
+        : '';
+
+    const editHtml = (IS_SUPERUSER || IS_EDITOR)
+    ? `<a href="/project/${projectId}/edit/" class="project-edit-link">Edit Project</a>`
+    : '';
+
+    const deleteHtml = IS_SUPERUSER
+        ? `<button type="button" class="project-delete-trigger" popovertarget="delete-project-${projectId}" title="Delete project">Delete Project</button>
+           <div id="delete-project-${projectId}" class="project-delete-modal" popover="auto" role="dialog" aria-modal="true">
+               <button type="button" class="project-delete-modal__backdrop" popovertarget="delete-project-${projectId}" popovertargetaction="hide" aria-label="Close"></button>
+               <div class="project-delete-modal__content">
+                   <button type="button" class="project-delete-modal__close" popovertarget="delete-project-${projectId}" popovertargetaction="hide" aria-label="Close">&times;</button>
+                   <h2>Delete Project?</h2>
+                   <p>Are you sure you want to delete <strong>${escapeHtml(project.title)}</strong>?</p>
+                   <div class="project-delete-modal__actions">
+                       <button type="button" class="project-search-clear" popovertarget="delete-project-${projectId}" popovertargetaction="hide">Cancel</button>
+                       <form method="post" action="/project/${projectId}/delete/">
+                           {% csrf_token %}
+                           <button type="submit" class="button-danger">Yes, Delete</button>
+                       </form>
+                   </div>
+               </div>
+           </div>`
+        : '';
+
+    const starredClass = project.is_starred ? ' is-starred' : '';
+    const starLabel = project.is_starred ? 'Unstar' : 'Star';
+    const starTitle = project.star_count > 0
+        ? `Starred by ${escapeHtml(project.starred_by_names)}`
+        : "Be the first to star this";
+
+    const starHtml = `
+        <form method="post" action="/project/${projectId}/star/" class="star-form" data-star-form>
+            {% csrf_token %}
+            <button type="submit" class="button-star${starredClass}" data-star-button
+                    title="${starTitle}">
+                <span aria-hidden="true">★</span>
+                <span data-star-label>${starLabel}</span>
+                <span class="star-count" data-star-count>${project.star_count}</span>
+            </button>
+        </form>
+    `;
+
+    const photoHtml = project.thumbnail
+        ? `<div class="project-photo">
+                <div class="project-photo-block"></div>
+                <a href="#img-modal-${projectId}">
+                    <img class="project-img" src="${escapeHtml(project.thumbnail)}" alt="${escapeHtml(project.title)}">
+                </a>
+                <div id="img-modal-${projectId}" class="lightbox-modal">
+                    <a href="#close" class="lightbox-close">&times;</a>
+                    <img class="lightbox-content" src="${escapeHtml(project.thumbnail)}" alt="${escapeHtml(project.title)} Full">
+                </div>
+           </div>`
+        : '';
+
+    wrapper.innerHTML = `
+        <div class="project-text">
+            <h3>${escapeHtml(project.title)}</h3>
+            <p>${escapeHtml(project.description)}</p>
+            <div class="project-tags">${tagsHtml}</div>
+            ${linkHtml}
+            ${starHtml}
+            <div class="project-actions-row">${editHtml}${deleteHtml}</div>
+        </div>
+        ${photoHtml}
+    `;
+
+    return wrapper;
+}
+
+async function fetchProjects(query = "") {
+    if (projectsAbortController) projectsAbortController.abort();
+    projectsAbortController = new AbortController();
+
+    try {
+        displayPageSection({ showLoading: true });
+
+        const url = query ? `${BASE_PROJECTS_ENDPOINT}?q=${encodeURIComponent(query)}` : BASE_PROJECTS_ENDPOINT;
+        const response = await fetch(url, {
+            headers: { 'Accept': 'application/json' },
+            signal: projectsAbortController.signal,
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch data');
+
+        const data = await response.json();
+
+        searchStatus.classList.toggle('hide', !query);
+        if (query) searchStatusQuery.textContent = query;
+
+        if (data.length === 0) {
+            displayPageSection({ showEmpty: true });
+        } else {
+            gridContainer.innerHTML = '';
+            data.forEach((item, index) => {
+                gridContainer.appendChild(buildProjectCardElement(item, index));
+            });
+            displayPageSection({ showGrid: true });
+        }
+    } catch (error) {
+        if (error.name === 'AbortError') return;
+        console.error('Error loading projects:', error);
+        displayPageSection({ showError: true });
+    }
+}
+
+function searchProjects() {
+    fetchProjects(searchInput.value.trim());
+}
+
+searchInput.addEventListener('input', function () {
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(searchProjects, SEARCH_DEBOUNCE_DELAY);
+});
+
+searchForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    clearTimeout(searchDebounceTimer);
+    searchProjects();
+});
+
+function closeProjectModal() {
+    document.getElementById("add-project-modal").hidePopover();
+}
+
+const CREATE_PROJECT_ENDPOINT = "{% url 'main:create_project_ajax' %}";
+const projectForm = document.getElementById('project-form');
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+async function addProject(event) {
+    event.preventDefault();
+
+    const submitButton = projectForm.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+
+    try {
+        const response = await fetch(CREATE_PROJECT_ENDPOINT, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            body: new FormData(projectForm),
+        });
+        const result = await response.json().catch(() => ({}));
+
+        if (response.ok) {
+            projectForm.reset();
+            closeProjectModal();
+            showToast('Success', 'New project added successfully!', 'success');
+            fetchProjects(searchInput.value.trim());
+        } else {
+            const errorMessages = result.errors
+                ? Object.values(result.errors).flat().map(error => error.message)
+                : [result.message || `An error occurred (status ${response.status}).`];
+            showToast('Failed to add project', errorMessages.join(' '), 'error');
+        }
+    } catch (error) {
+        console.error('Error adding project:', error);
+        showToast('Failed to add project', 'Could not connect to the server. Please try again.', 'error');
+    } finally {
+        submitButton.disabled = false;
+    }
+}
+
+if (projectForm) {
+    projectForm.addEventListener('submit', addProject);
+}
+
+fetchProjects(searchInput.value.trim());
+</script>
 {% endblock content %}

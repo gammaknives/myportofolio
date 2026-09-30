@@ -13,37 +13,34 @@ function getCookie(name) {
     return cookieValue;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('[data-star-form]').forEach(form => {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+document.addEventListener('submit', async (e) => {
+    const form = e.target.closest('[data-star-form]');
+    if (!form) return;
+    e.preventDefault();
 
-            const button = form.querySelector('[data-star-button]');
-            const label = form.querySelector('[data-star-label]');
-            const count = form.querySelector('[data-star-count]');
+    const button = form.querySelector('[data-star-button]');
+    const label = form.querySelector('[data-star-label]');
+    const count = form.querySelector('[data-star-count]');
 
-            try {
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                });
-
-                if (!response.ok) {
-                    form.submit();
-                    return;
-                }
-
-                const data = await response.json();
-
-                label.textContent = data.starred ? 'Unstar' : 'Star';
-                count.textContent = data.count;
-                button.classList.toggle('is-starred', data.starred);
-            } catch (error) {
-                form.submit();
-            }
+    try {
+        const response = await fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'X-Requested-With': 'XMLHttpRequest',
+            },
         });
-    });
+
+        if (!response.ok) {
+            form.submit();
+            return;
+        }
+
+        const data = await response.json();
+        label.textContent = data.starred ? 'Unstar' : 'Star';
+        count.textContent = data.count;
+        button.classList.toggle('is-starred', data.starred);
+    } catch (error) {
+        form.submit();
+    }
 });

@@ -11,6 +11,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from functools import wraps
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
 import datetime
 
@@ -42,7 +43,7 @@ def show_experience(request):
 
 def get_project_json(request):
     query = request.GET.get("q", "").strip()
-    projects = Project.objects.all()
+    projects = Project.objects.prefetch_related("starred_by").all()
 
     if query:
         projects = projects.filter(
@@ -51,22 +52,37 @@ def get_project_json(request):
             Q(tags__icontains=query)
         )
 
-    projects_json = serializers.serialize("json", projects, use_natural_foreign_keys=True)
-    return HttpResponse(projects_json, content_type="application/json")
+    data = []
+    for project in projects:
+        starred_users = project.starred_by.all()
+        is_starred = request.user in starred_users if request.user.is_authenticated else False
+        starred_by_names = ", ".join([u.username for u in starred_users])
+
+        data.append({
+            "pk": str(project.id),
+            "fields": {
+                "title": project.title,
+                "description": project.description,
+                "tags": project.tags,
+                "thumbnail": project.thumbnail or "",
+                "link": project.link or "",
+                "star_count": starred_users.count(),
+                "is_starred": is_starred,
+                "starred_by_names": starred_by_names,
+            },
+        })
+
+    return JsonResponse(data, safe=False)
 
 def show_project(request):
     query = request.GET.get("q", "").strip()
-
-    json_response = get_project_json(request)
-    projects = serializers.deserialize("json", json_response.content.decode("utf-8"))
-    projects = [project.object for project in projects]
     is_editor = request.user.is_authenticated and request.user.groups.filter(name="Editor").exists()
 
     context = {
         "name": "Nuno",
-        "project_list": projects,
         "query": query,
         "is_editor": is_editor,
+        "form": ProjectForm(),
     }
     return render(request, "projects.html", context)
 
@@ -279,3 +295,21 @@ def toggle_star_experience(request, experience_id):
             })
 
     return redirect("main:show_experience")
+
+@require_POST
+def create_project_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse(
+            {"message": "Only the portfolio owner can add projects."},
+            status=403,
+        )
+
+    form = ProjectForm(request.POST)
+    if form.is_valid():
+        project = form.save()
+        return JsonResponse(
+            {"message": "Project successfully added.", "pk": str(project.id)},
+            status=201,
+        )
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
