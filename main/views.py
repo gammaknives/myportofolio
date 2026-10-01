@@ -146,7 +146,22 @@ def get_experience_json(request):
     experiences = Experience.objects.prefetch_related("starred_by").all()
 
     if query:
-        experiences = experiences.filter(title__icontains=query)
+        query_lower = query.lower()
+        filtered = []
+        for experience in experiences:
+            ended_year = str(experience.ended_at.year) if experience.ended_at else ""
+            status_text = "still going" if experience.is_ongoing else ended_year
+
+            haystack = " ".join([
+                experience.title.lower(),
+                experience.description.lower(),
+                experience.get_category_display().lower(),
+                status_text.lower(),
+            ])
+
+            if query_lower in haystack:
+                filtered.append(experience)
+        experiences = filtered
 
     data = []
     for experience in experiences:
@@ -176,6 +191,7 @@ def show_experience(request):
     context = {
         "name": "Nuno",
         "is_editor": is_editor,
+        "form": ExperienceForm(),
     }
     return render(request, "experiences.html", context)
 
@@ -337,6 +353,24 @@ def create_project_ajax(request):
         project = form.save()
         return JsonResponse(
             {"message": "Project successfully added.", "pk": str(project.id)},
+            status=201,
+        )
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+
+@require_POST
+def create_experience_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse(
+            {"message": "Only the portfolio owner can add experiences."},
+            status=403,
+        )
+
+    form = ExperienceForm(request.POST)
+    if form.is_valid():
+        experience = form.save()
+        return JsonResponse(
+            {"message": "Experience successfully added.", "pk": str(experience.id)},
             status=201,
         )
 

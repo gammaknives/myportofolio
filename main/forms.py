@@ -47,14 +47,20 @@ class ProjectForm(ModelForm):
     def clean_title(self):
         title = strip_tags(self.cleaned_data["title"]).strip()
         if not title:
-            raise ValidationError("Project name cannot consist of HTML tags only.")
+            raise ValidationError("Title cannot consist of HTML tags only.")
         return title
 
-    def clean_tags(self):
-        return strip_tags(self.cleaned_data["tags"]).strip()
-
     def clean_description(self):
-        return strip_tags(self.cleaned_data["description"]).strip()
+        description = strip_tags(self.cleaned_data["description"]).strip()
+        if not description:
+            raise ValidationError("Description cannot consist of HTML tags only.")
+        return description
+
+    def clean_tags(self):
+        tags = strip_tags(self.cleaned_data["tags"]).strip()
+        if not tags:
+            raise ValidationError("Tags cannot consist of HTML tags only.")
+        return tags
 
 class ExperienceForm(ModelForm):
     class Meta:
@@ -85,3 +91,15 @@ class ExperienceForm(ModelForm):
             "category": Select(),
             "ended_at": DateInput(attrs={"type": "date"}),
         }
+
+    def clean_title(self):
+        title = strip_tags(self.cleaned_data["title"]).strip()
+        if not title:
+            raise ValidationError("Title cannot consist of HTML tags only.")
+        return title
+
+    def clean_description(self):
+        description = strip_tags(self.cleaned_data["description"]).strip()
+        if not description:
+            raise ValidationError("Description cannot consist of HTML tags only.")
+        return description
