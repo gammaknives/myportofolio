@@ -31,16 +31,6 @@ def show_main(request):
     }
     return render(request, "index.html", context)
 
-def show_experience(request):
-    is_editor = request.user.is_authenticated and request.user.groups.filter(name="Editor").exists()
-
-    context = {
-        "name": "Nuno",
-        "experience_list": Experience.objects.all(),
-        "is_editor": is_editor,
-    }
-    return render(request, "experiences.html", context)
-
 def get_project_json(request):
     query = request.GET.get("q", "").strip()
     projects = Project.objects.prefetch_related("starred_by").all()
@@ -150,6 +140,44 @@ def update_project(request, project_id):
         "project": project,
     }
     return render(request, "projects_form.html", context)
+
+def get_experience_json(request):
+    query = request.GET.get("q", "").strip()
+    experiences = Experience.objects.prefetch_related("starred_by").all()
+
+    if query:
+        experiences = experiences.filter(title__icontains=query)
+
+    data = []
+    for experience in experiences:
+        starred_users = experience.starred_by.all()
+        is_starred = request.user in starred_users if request.user.is_authenticated else False
+        starred_by_names = ", ".join([u.username for u in starred_users])
+
+        data.append({
+            "pk": str(experience.id),
+            "fields": {
+                "title": experience.title,
+                "description": experience.description,
+                "category": experience.get_category_display(),
+                "is_ongoing": experience.is_ongoing,
+                "ended_year": experience.ended_at.year if experience.ended_at else None,
+                "star_count": starred_users.count(),
+                "is_starred": is_starred,
+                "starred_by_names": starred_by_names,
+            },
+        })
+
+    return JsonResponse(data, safe=False)
+
+def show_experience(request):
+    is_editor = request.user.is_authenticated and request.user.groups.filter(name="Editor").exists()
+
+    context = {
+        "name": "Nuno",
+        "is_editor": is_editor,
+    }
+    return render(request, "experiences.html", context)
 
 @owner_required
 def create_experience(request):
