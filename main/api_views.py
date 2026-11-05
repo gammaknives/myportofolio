@@ -94,6 +94,9 @@ def experience_list(request):
             if query.isdigit() and len(query) == 4:
                 condition |= Q(ended_at__year=int(query))
             experiences = experiences.filter(condition)
+        serializer = ExperienceSerializer(
+            experiences, many=True, context={"request": request},
+        )
         return Response(serializer.data)
 
     serializer = ExperienceSerializer(data=request.data, context={"request": request})

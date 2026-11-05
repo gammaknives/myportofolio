@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+
 from functools import wraps
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
@@ -190,6 +191,7 @@ def show_experience(request):
         "name": "Nuno",
         "is_editor": is_editor,
         "form": ExperienceForm(),
+        "edit_form": ExperienceForm(auto_id="edit_id_%s"),
     }
     return render(request, "experiences.html", context)
 
