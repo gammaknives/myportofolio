@@ -84,14 +84,16 @@ def experience_list(request):
         )
         query = request.GET.get("q", "").strip()
         if query:
-            experiences = experiences.filter(
+            condition = (
                 Q(title__icontains=query)
                 | Q(description__icontains=query)
                 | Q(category__icontains=query)
             )
-        serializer = ExperienceSerializer(
-            experiences, many=True, context={"request": request},
-        )
+            if query.lower() in "still going":
+                condition |= Q(ended_at__isnull=True)
+            if query.isdigit() and len(query) == 4:
+                condition |= Q(ended_at__year=int(query))
+            experiences = experiences.filter(condition)
         return Response(serializer.data)
 
     serializer = ExperienceSerializer(data=request.data, context={"request": request})
