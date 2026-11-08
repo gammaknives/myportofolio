@@ -68,6 +68,8 @@ class ProjectAPITest(APITestCase):
         for changes, field in [
             ({"title": "   "}, "title"),
             ({"title": '<img src="x" onerror="alert(1)">'}, "title"),
+            ({"description": "<i></i>"}, "description"),
+            ({"tags": "<b></b>"}, "tags"),
             ({"link": "javascript:alert(1)"}, "link"),
         ]:
             response = self.client.post(self.list_url, {**self.payload, **changes}, format="json")
@@ -313,6 +315,7 @@ class ExperienceAPITest(APITestCase):
         for changes, field in [
             ({"title": "   "}, "title"),
             ({"title": "<b></b>"}, "title"),
+            ({"description": "<i></i>"}, "description"),
             ({"category": "banana"}, "category"),
             ({"ended_at": "not-a-date"}, "ended_at"),
         ]:
