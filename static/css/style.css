@@ -796,12 +796,6 @@ h3,
     transition: color 0.2s ease, transform 0.2s ease;
 }
 
-.project-delete-trigger:hover {
-    color: white;
-    transform: translateX(3px);
-    background: none;
-}
-
 .project-delete-modal {
     display: none;
     position: fixed;
@@ -917,11 +911,6 @@ h3,
     color: blue;
     text-decoration: none;
     transition: color 0.2s ease, transform 0.2s ease;
-}
-
-.project-edit-link:hover {
-    color: white;
-    transform: translateX(3px);
 }
 
 .project-actions-row {
