@@ -29,6 +29,9 @@ def project_list(request):
                 | Q(description__icontains=query)
                 | Q(tags__icontains=query)
             )
+        tag = request.GET.get("tag", "").strip().lower()
+        if tag:
+            projects = [p for p in projects if tag in [t.lower() for t in p.get_tags()]]
         serializer = ProjectSerializer(
             projects, many=True, context={"request": request},
         )
@@ -84,11 +87,19 @@ def experience_list(request):
         )
         query = request.GET.get("q", "").strip()
         if query:
-            experiences = experiences.filter(
+            condition = (
                 Q(title__icontains=query)
                 | Q(description__icontains=query)
                 | Q(category__icontains=query)
             )
+            if query.lower() in "still going":
+                condition |= Q(ended_at__isnull=True)
+            if query.isdigit() and len(query) == 4:
+                condition |= Q(ended_at__year=int(query))
+            experiences = experiences.filter(condition)
+        category = request.GET.get("category", "").strip()
+        if category:
+            experiences = experiences.filter(category__iexact=category)
         serializer = ExperienceSerializer(
             experiences, many=True, context={"request": request},
         )

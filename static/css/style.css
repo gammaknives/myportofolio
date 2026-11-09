@@ -796,12 +796,6 @@ h3,
     transition: color 0.2s ease, transform 0.2s ease;
 }
 
-.project-delete-trigger:hover {
-    color: white;
-    transform: translateX(3px);
-    background: none;
-}
-
 .project-delete-modal {
     display: none;
     position: fixed;
@@ -917,11 +911,6 @@ h3,
     color: blue;
     text-decoration: none;
     transition: color 0.2s ease, transform 0.2s ease;
-}
-
-.project-edit-link:hover {
-    color: white;
-    transform: translateX(3px);
 }
 
 .project-actions-row {
@@ -1160,4 +1149,13 @@ h3,
 
 [data-theme="dark"] .theme-icon-moon {
     display: inline;
+}
+
+.tag.is-active { outline: 2px solid currentColor; }
+
+.experience-filters { margin-top: 1rem; display: flex; align-items: center; gap: 0.75rem; }
+.experience-filter-select { width: auto; min-width: 12rem; }
+.experience-filter-select option {
+    color: #1a1a1a;
+    background: #ffffff;
 }
