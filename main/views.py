@@ -192,6 +192,8 @@ def show_experience(request):
         "name": "Nuno",
         "is_editor": is_editor,
         "form": ExperienceForm(),
+        "edit_form": ExperienceForm(auto_id="edit_id_%s"),
+        "category_choices": Experience.EXPERIENCE_CHOICES,
     }
     return render(request, "experiences.html", context)
 

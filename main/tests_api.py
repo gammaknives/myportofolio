@@ -193,3 +193,21 @@ class ExperienceAPITest(APITestCase):
         self.assertEqual(bad.status_code, 400)
         self.assertIn("category", bad.data)
         self.assertEqual(self.client.delete(self.detail_url).status_code, 204)
+
+    def test_filter_by_category(self):
+        def ids(params):
+            return self.result_ids(self.client.get(self.list_url, params))
+
+        research_id = str(self.experience.id)
+        parttime_id = str(self.ended.id)
+
+        self.assertIn(research_id, ids({"category": "research"}))
+        self.assertNotIn(parttime_id, ids({"category": "research"}))
+        self.assertIn(parttime_id, ids({"category": "part-time"}))
+        self.assertIn(research_id, ids({"category": "RESEARCH"}))
+        self.assertNotIn(parttime_id, ids({"category": "part"}))
+        self.assertEqual(ids({"category": "banana"}), [])
+        self.assertIn(research_id, ids({"category": "research", "q": "lab"}))
+        self.assertNotIn(research_id, ids({"category": "research", "q": "barista"}))
+        self.assertIn(research_id, ids({"category": ""}))
+        self.assertIn(parttime_id, ids({"category": ""}))
