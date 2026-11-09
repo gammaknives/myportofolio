@@ -1161,3 +1161,5 @@ h3,
 [data-theme="dark"] .theme-icon-moon {
     display: inline;
 }
+
+.tag.is-active { outline: 2px solid currentColor; }

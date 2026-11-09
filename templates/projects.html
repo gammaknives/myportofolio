@@ -35,6 +35,11 @@
                 Showing results for "<strong id="search-status-query"></strong>"
             </p>
 
+            <p class="project-search-status hide" id="tag-filter-status">
+                Filtering by tag: <strong id="tag-filter-name"></strong>
+                <button type="button" class="project-search-clear" id="tag-filter-clear">Clear filter</button>
+            </p>
+
             <br>
 
             <div id="loading" class="hide"><p class="empty-state">Loading projects...</p></div>
@@ -64,6 +69,7 @@ const SEARCH_DEBOUNCE_DELAY = 300;
 
 let projectsAbortController;
 let searchDebounceTimer;
+let activeTag = new URLSearchParams(window.location.search).get('tag') || '';
 
 const loadingState = document.getElementById('loading');
 const errorState = document.getElementById('error');
@@ -73,6 +79,9 @@ const searchForm = document.getElementById('project-search-form');
 const searchInput = document.getElementById('search-input');
 const searchStatus = document.getElementById('search-status');
 const searchStatusQuery = document.getElementById('search-status-query');
+const tagFilterStatus = document.getElementById('tag-filter-status');
+const tagFilterName = document.getElementById('tag-filter-name');
+const tagFilterClear = document.getElementById('tag-filter-clear');
 const projectForm = document.getElementById('project-form');
 
 function getCookie(name) {
@@ -102,6 +111,23 @@ function displayPageSection({ showLoading = false, showError = false, showEmpty 
     gridContainer.classList.toggle('hide', !showGrid);
 }
 
+function renderTagFilterStatus() {
+    tagFilterStatus.classList.toggle('hide', !activeTag);
+    tagFilterName.textContent = activeTag;
+}
+
+function setActiveTag(tag) {
+    activeTag = tag;
+    renderTagFilterStatus();
+
+    const params = new URLSearchParams(window.location.search);
+    if (tag) params.set('tag', tag); else params.delete('tag');
+    const queryString = params.toString();
+    history.replaceState(null, '', queryString ? `?${queryString}` : window.location.pathname);
+
+    return fetchProjects(searchInput.value.trim());
+}
+
 function buildProjectCardElement(project, index) {
     const projectId = project.id;
 
@@ -109,7 +135,12 @@ function buildProjectCardElement(project, index) {
     wrapper.className = 'project-row' + ((index + 1) % 2 === 0 ? ' project-row-reverse' : '');
 
     const tags = (project.tags || '').split(',').map(t => t.trim()).filter(Boolean);
-    const tagsHtml = tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('');
+    const tagsHtml = tags.map(t => {
+        const isActive = t.toLowerCase() === activeTag.toLowerCase();
+        return `<a href="?tag=${escapeHtml(encodeURIComponent(t))}" class="tag${isActive ? ' is-active' : ''}"
+                   data-action="filter-tag" data-tag="${escapeHtml(t)}"
+                   title="Show projects tagged ${escapeHtml(t)}">${escapeHtml(t)}</a>`;
+    }).join('');
 
     const linkHtml = project.link
         ? `<a href="${escapeHtml(project.link)}" class="project-link" target="_blank" rel="noopener noreferrer">View Project &rarr;</a><br>`
@@ -191,6 +222,7 @@ async function fetchProjects(query = '') {
 
         const url = new URL(BASE_PROJECTS_ENDPOINT, window.location.origin);
         if (query) url.searchParams.set(SEARCH_PARAM, query);
+        if (activeTag) url.searchParams.set('tag', activeTag);
 
         const response = await fetch(url, {
             headers: { Accept: 'application/json' },
@@ -218,7 +250,10 @@ async function fetchProjects(query = '') {
 }
 
 function apiErrorMessage(data, status) {
-    const messages = Object.values(data).flat().filter(value => typeof value === 'string');
+    const messages = Object.entries(data).map(([field, value]) => {
+        const text = [].concat(value).filter(item => typeof item === 'string').join(' ');
+        return field === 'detail' || !text ? text : `${field}: ${text}`;
+    }).filter(Boolean);
     return messages.join(' ') || `Request failed (HTTP ${status}).`;
 }
 
@@ -270,17 +305,26 @@ if (projectForm) {
     projectForm.addEventListener('submit', addProject);
 }
 
+// Event delegation: tag filters, star, and delete controls, including ones rendered later
 gridContainer.addEventListener('click', async function (event) {
-    const button = event.target.closest('button[data-action]');
-    if (!button || button.disabled) return;
+    const control = event.target.closest('[data-action]');
+    if (!control || control.disabled) return;
 
-    const action = button.dataset.action;
-    button.disabled = true;
+    const action = control.dataset.action;
 
+    if (action === 'filter-tag') {
+        event.preventDefault();
+        const tag = control.dataset.tag;
+        // Clicking the active tag again clears the filter
+        await setActiveTag(tag.toLowerCase() === activeTag.toLowerCase() ? '' : tag);
+        return;
+    }
+
+    control.disabled = true;
     try {
         const pattern = action === 'star' ? STAR_PROJECT_ENDPOINT : DETAIL_PROJECT_ENDPOINT;
         await writeProject(
-            projectEndpoint(pattern, button.dataset.id),
+            projectEndpoint(pattern, control.dataset.id),
             action === 'star' ? 'POST' : 'DELETE',
         );
         showToast('Success', action === 'star' ? 'Star updated.' : 'Project deleted.', 'success');
@@ -288,8 +332,12 @@ gridContainer.addEventListener('click', async function (event) {
     } catch (error) {
         showToast('Request failed', error.message, 'error');
     } finally {
-        button.disabled = false;
+        control.disabled = false;
     }
+});
+
+tagFilterClear.addEventListener('click', function () {
+    setActiveTag('');
 });
 
 function searchProjects() {
@@ -307,6 +355,7 @@ searchForm.addEventListener('submit', function (e) {
     searchProjects();
 });
 
+renderTagFilterStatus();
 fetchProjects(searchInput.value.trim());
 </script>
 {% endblock content %}

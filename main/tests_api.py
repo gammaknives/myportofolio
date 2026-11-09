@@ -138,6 +138,24 @@ class ProjectAPITest(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    def test_filter_by_tag(self):
+        other = Project.objects.create(title="Other", description="x", tags="Java, Film")
+        third = Project.objects.create(title="Third", description="y", tags="JavaScript")
+
+        def ids(params):
+            return [p["id"] for p in self.client.get(self.list_url, params).data]
+
+        self.assertIn(str(self.project.id), ids({"tag": "django"}))
+        self.assertNotIn(str(other.id), ids({"tag": "django"}))
+        self.assertIn(str(other.id), ids({"tag": "Java"}))
+        self.assertNotIn(str(third.id), ids({"tag": "Java"}))
+        self.assertNotIn(str(self.project.id), ids({"tag": "Dja"}))
+        self.assertEqual(ids({"tag": "zzz-none"}), [])
+        self.assertIn(str(other.id), ids({"tag": " film "}))
+        self.assertIn(str(other.id), ids({"tag": "java", "q": "Other"}))
+        self.assertNotIn(str(other.id), ids({"tag": "java", "q": "Portfolio"}))
+        self.assertIn(str(self.project.id), ids({"tag": ""}))
+
 class ExperienceAPITest(APITestCase):
     def setUp(self):
         self.owner = User.objects.create_superuser(username="owner2", password="test-password", email="o@example.com")

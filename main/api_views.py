@@ -29,6 +29,9 @@ def project_list(request):
                 | Q(description__icontains=query)
                 | Q(tags__icontains=query)
             )
+        tag = request.GET.get("tag", "").strip().lower()
+        if tag:
+            projects = [p for p in projects if tag in [t.lower() for t in p.get_tags()]]
         serializer = ProjectSerializer(
             projects, many=True, context={"request": request},
         )
