@@ -1,7 +1,7 @@
 # Website Portofolio Nuno Mikael Nugroho
 
 ## Gambaran Umum
-Website portofolio pribadi yang dibuat untuk mata kuliah Pemrograman Berbasis Platform, menampilkan latar belakang, keahlian, pengalaman, dan proyek saya sebagai mahasiswa Ilmu Komputer di Universitas Indonesia. Awalnya dibangun sebagai situs statis untuk Tugas Individu 1, kemudian dikembangkan menjadi aplikasi Django dinamis menggunakan pola Model-View-Template (MVT) untuk Tugas Individu 2, dan dilengkapi dengan fitur Create/Update/Delete, data delivery dalam format JSON, serta autentikasi untuk Tugas Individu 3.
+Website portofolio pribadi yang dibuat untuk mata kuliah Pemrograman Berbasis Platform, menampilkan latar belakang, keahlian, pengalaman, dan proyek saya sebagai mahasiswa Ilmu Komputer di Universitas Indonesia. Awalnya dibangun sebagai situs statis untuk Tugas Individu 1, kemudian dikembangkan menjadi aplikasi Django dinamis menggunakan pola Model-View-Template (MVT) untuk Tugas Individu 2, dan dilengkapi dengan fitur Create/Update/Delete, data delivery dalam format JSON, serta autentikasi untuk Tugas Individu 3. Pada tugas-tugas berikutnya ditambahkan hak akses berbasis peran (Tugas Individu 4), pembaruan halaman tanpa reload menggunakan AJAX (Tugas Individu 5), dan REST API dengan Django REST Framework yang dipakai langsung oleh halaman Projects dan Experience (Tugas Individu 6).
 
 ## Fitur
 - **Tata letak responsif**
@@ -16,8 +16,20 @@ Website portofolio pribadi yang dibuat untuk mata kuliah Pemrograman Berbasis Pl
     baik untuk Project maupun Experience, menggunakan `ModelForm` dan dilindungi login (`@login_required`)
 - **Data delivery dalam format JSON**
     endpoint `/api/project/` mengembalikan data proyek dalam format JSON, dan halaman Projects mengambil datanya melalui proses serialization/deserialization
-- **Kolom pencarian proyek**
-    memfilter proyek berdasarkan judul, deskripsi, atau tag menggunakan `Q` objects dari Django dan parameter query `GET` — tanpa JavaScript
+- **REST API dengan Django REST Framework**
+    endpoint `/api/v1/projects/` dan `/api/v1/experiences/` mendukung GET, POST, PUT, PATCH, DELETE, serta endpoint star, dengan status HTTP yang sesuai (200, 201, 204, 400, 403, 404)
+- **Serializer dengan validasi**
+    `ProjectSerializer` dan `ExperienceSerializer` menulis daftar field secara eksplisit, membersihkan input teks dengan `strip_tags`, dan menyediakan field hitungan yang read-only (`star_count`, `is_starred`, `starred_by_names`)
+- **Hak akses berbasis peran di API**
+    pengunjung hanya membaca; pengguna biasa juga dapat memberi star; Editor juga dapat mengubah data (PUT/PATCH) pada Experience; pemilik (superuser) dapat membuat, mengubah, dan menghapus
+- **Fitur star**
+    pengguna yang login dapat memberi atau membatalkan star pada proyek dan pengalaman, diperbarui tanpa reload halaman
+- **Pembaruan halaman tanpa reload (AJAX)**
+    daftar, pencarian, tambah, ubah, star, dan hapus dilakukan lewat `fetch()` ke API, dengan pesan kesalahan dari API ditampilkan sebagai toast
+- **Kolom pencarian**
+    memfilter proyek dan pengalaman menggunakan `Q` objects Django dan parameter query `q`, dipanggil lewat AJAX dengan debouncing 300 ms
+- **Modal edit untuk Experience**
+    Editor dan pemilik dapat mengubah pengalaman langsung dari halaman lewat PATCH ke API
 - **Lightbox penampil gambar**
     klik gambar proyek mana pun untuk melihatnya secara penuh, dibuat dengan CSS murni (selector `:target`, tanpa JavaScript)
 - **Skills section**
@@ -26,18 +38,56 @@ Website portofolio pribadi yang dibuat untuk mata kuliah Pemrograman Berbasis Pl
     gaya visual beda untuk menyesuaikan dengan preferensi pengunjung
 - **Latar belakang CSS kustom untuk header, body, dan footer**
     latar belakang gambar/tekstur untuk header dan footer, latar belakang gradasi warna untuk body
+- **Pengujian otomatis**
+    test dengan `APITestCase` untuk setiap peran, validasi, star, dan perlindungan CSRF
+
+## Fitur Tambahan (Tugas 6)
+- **Filter tag pada halaman Projects**
+    setiap tag pada kartu proyek dapat diklik untuk memfilter daftar (`/api/v1/projects/?tag=Django`). Pencocokan dilakukan pada tag utuh dan tidak membedakan huruf besar/kecil, sehingga `Java` tidak cocok dengan `JavaScript`. Filter dapat digabung dengan pencarian, menampilkan keterangan "Filtering by tag" dengan tombol hapus, dan tersimpan di URL (`/projects/?tag=Django`) agar tampilan terfilter dapat dibagikan. Mengklik tag yang sedang aktif akan menghapus filter.
+- **Dropdown kategori pada halaman Experience**
+    daftar kategori diambil dari pilihan pada model, lalu memfilter lewat `/api/v1/experiences/?category=research`. Filter dapat digabung dengan pencarian dan tersimpan di URL (`/experience/?category=research`).
+
+Keduanya diuji dengan `APITestCase` (`test_filter_by_tag` dan `test_filter_by_category`).
+
+## Dokumentasi API
+Semua endpoint berada di bawah `/api/v1/` dan memakai `SessionAuthentication`, sehingga setiap permintaan yang mengubah data harus menyertakan header `X-CSRFToken`.
+
+| Endpoint | Method | Fungsi | Siapa yang boleh |
+|---|---|---|---|
+| `/api/v1/projects/?q=&tag=` | GET | Daftar proyek (dapat dicari/difilter) | Semua |
+| `/api/v1/projects/` | POST | Membuat proyek | Pemilik |
+| `/api/v1/projects/<id>/` | GET | Detail proyek | Semua |
+| `/api/v1/projects/<id>/` | PUT, PATCH, DELETE | Mengubah / menghapus proyek | Pemilik |
+| `/api/v1/projects/<id>/star/` | POST | Memberi / membatalkan star | Pengguna yang login |
+| `/api/v1/experiences/?q=&category=` | GET | Daftar pengalaman (dapat dicari/difilter) | Semua |
+| `/api/v1/experiences/` | POST | Membuat pengalaman | Pemilik |
+| `/api/v1/experiences/<id>/` | GET | Detail pengalaman | Semua |
+| `/api/v1/experiences/<id>/` | PUT, PATCH | Mengubah pengalaman | Pemilik dan Editor |
+| `/api/v1/experiences/<id>/` | DELETE | Menghapus pengalaman | Pemilik |
+| `/api/v1/experiences/<id>/star/` | POST | Memberi / membatalkan star | Pengguna yang login |
+
+## Menjalankan Test
+```
+python manage.py test main.tests_api --verbosity 2
+python manage.py test main
+```
+Gunakan `python manage.py test main`, bukan `python manage.py test` tanpa nama app, agar skrip Selenium (jika ada) tidak ikut dijalankan.
 
 ## Tech Stack
 - **Django**
     framework backend yang menangani routing, view, model, form, autentikasi, dan template (pola MVT)
+- **Django REST Framework**
+    serializer, permission class, dan API view berbasis fungsi (`@api_view`) untuk REST API di `/api/v1/`
 - **HTML5**
     elemen semantik (`<header>`, `<nav>`, `<main>`, `<section>`, `<footer>`), template inheritance dengan `base.html`
 - **CSS3** 
     Grid layout, custom properties (CSS variables), media queries, `:target` untuk interaktivitas
+- **JavaScript**
+    `fetch()` dan `async`/`await` untuk memanggil API, debouncing pencarian, event delegation, dan escaping HTML sebelum data disisipkan ke halaman
 - **Google Fonts**
     Space Grotesk
 
-Tidak ada JavaScript yang digunakan dalam proyek ini. Seluruh interaktivitas dicapai melalui logika sisi server Django yang dikombinasikan dengan teknik HTML/CSS murni.
+JavaScript digunakan sejak Tugas 5 untuk memuat dan memperbarui data halaman Projects dan Experience lewat API tanpa reload. Lightbox gambar tetap dibuat dengan CSS murni.
 
 ## Reflection  Tugas 1
 1.  Yes, I used semantic HTML5 elements, specifically `<header>`, `<nav>`, `<main>`, `<section>`, and `<footer>`. I
@@ -91,11 +141,28 @@ Tugas ini menambahkan implementasi pembuatan akun dengan implementasi register, 
 
 3. XSS (Cross-Site Scripting) adalah jenis serangan di mana penyerang menyisipkan kode skrip berbahaya (biasanya JavaScript) ke dalam halaman web, yang kemudian dieksekusi oleh browser pengguna lain yang membuka halaman tersebut. Pada proyek ini, contohnya adalah menyimpan judul proyek berupa <img src="x" onerror="alert('XSS!')">; jika teks tersebut dirender sebagai HTML alih-alih sebagai teks biasa, browser akan mencoba memuat gambar, gagal, lalu menjalankan skrip pada atribut onerror. Data yang ditampilkan melalui AJAX/JavaScript lebih rentan terhadap serangan ini dibandingkan data yang ditampilkan langsung melalui template Django karena Django Template Language melakukan auto-escaping secara otomatis pada setiap variabel yang disisipkan dengan {{ }}, mengubah karakter seperti < dan > menjadi entity HTML sehingga tidak pernah ditafsirkan sebagai tag. Sebaliknya, ketika data JSON dirakit menjadi HTML secara manual di JavaScript (misalnya melalui innerHTML atau template string), tidak ada proses escaping otomatis sama sekali kecuali ditambahkan secara eksplisit. Karena itu, pada proyek ini saya menambahkan dua lapis perlindungan: escaping manual di sisi klien melalui fungsi escapeHtml sebelum setiap nilai teks disisipkan ke HTML, serta pembersihan tag HTML di sisi server menggunakan strip_tags pada method clean_<field> di ModelForm, sehingga data berbahaya sudah ditolak atau dibersihkan sebelum sempat tersimpan ke database.
 
+## Refleksi — Tugas 6
+1. REST (Representational State Transfer) adalah gaya arsitektur untuk merancang layanan web, bukan sebuah format data atau library. Prinsip utamanya adalah client–server yang terpisah, komunikasi stateless (setiap request membawa semua informasi yang dibutuhkan), setiap resource punya URL sendiri (misalnya `/api/v1/projects/<id>/`), dan antarmuka yang seragam: aksi ditentukan oleh method HTTP standar (GET untuk membaca, POST untuk membuat, PUT/PATCH untuk mengubah, DELETE untuk menghapus), sedangkan hasilnya dilaporkan lewat status HTTP yang bermakna, seperti 201 Created, 204 No Content, 400 Bad Request, 403 Forbidden, dan 404 Not Found. Hanya mengembalikan JSON belum cukup untuk disebut RESTful, karena JSON hanya format representasi data. Pada Tutorial 05, `get_project_json` memang mengembalikan JSON, tetapi aksi lainnya dilakukan lewat URL yang berbentuk kata kerja seperti `/project/<id>/delete/` dan `/project/<id>/star/` yang semuanya memakai POST dan berakhir dengan redirect atau status 200, sehingga lebih mirip pemanggilan prosedur daripada pengelolaan resource. Pada API yang sekarang, satu URL resource dipakai bersama oleh beberapa method (GET, PUT, PATCH, DELETE pada `/api/v1/projects/<id>/`), dan status HTTP dipakai dengan benar sehingga client (termasuk test saya) dapat memahami hasilnya tanpa menafsirkan isi response. Endpoint star tetap berupa aksi toggle lewat POST, yang menurut saya merupakan kompromi pragmatis dan tidak sepenuhnya murni REST.
+
+    Perbedaan PUT dan PATCH ada pada cakupan perubahannya. PUT mengganti seluruh representasi resource, sehingga semua field wajib dikirim; jika ada field wajib yang hilang, request ditolak. Pada proyek ini, PUT ke proyek dengan hanya `{"title": "Incomplete"}` menghasilkan 400 karena `description` dan `tags` wajib, dan hal ini diuji pada `test_patch_put_and_delete`. PATCH hanya mengubah field yang dikirim, dan field lain tetap memakai nilai sebelumnya karena serializer dipanggil dengan `partial=True`. PATCH sebaiknya dipakai ketika hanya satu atau beberapa field yang berubah, misalnya mengganti judul sebuah proyek dari Console atau menghapus tanggal selesai (`{"ended_at": null}`) pada sebuah pengalaman, sedangkan PUT sebaiknya dipakai ketika client memang mengirim ulang seluruh data resource, misalnya form edit lengkap yang menggantikan semua isi sebelumnya.
+
+2. Serializer pada Django REST Framework berperan sebagai penerjemah dua arah antara objek model dan data yang dapat dikirim lewat HTTP. Pada arah keluar (serialization), serializer mengubah instance model menjadi tipe data sederhana yang kemudian dirender menjadi JSON, termasuk field hitungan seperti `star_count`, `is_starred`, dan `starred_by_names` lewat `SerializerMethodField`. Pada arah masuk (deserialization), serializer memvalidasi data dari request (`is_valid()`), menjalankan metode `validate_<field>` seperti `strip_tags`, lalu menyimpan hasilnya ke model lewat `save()`. Serializer juga menentukan field mana yang tampil melalui daftar `fields` yang ditulis eksplisit, sehingga data sensitif tidak ikut terkirim, dan menandai field tertentu sebagai read-only sehingga tidak dapat dipalsukan dari luar (dibuktikan pada `test_computed_fields_are_read_only`, ketika `star_count: 99` dari request diabaikan).
+
+    Dibandingkan merakit dictionary secara manual dengan `JsonResponse` seperti pada Tutorial 05, serializer jauh lebih ringkas dan konsisten. Pada `get_project_json`, saya harus menulis sendiri setiap pasangan kunci–nilai, mengubah UUID menjadi string, dan menghitung star secara manual, sedangkan validasi input dilakukan di tempat lain oleh `ModelForm` dengan format error yang berbeda. Dengan serializer, satu class dipakai untuk daftar, detail, pembuatan, dan pembaruan, dengan aturan validasi yang sama dan format error yang seragam (`{"title": ["..."]}`) sehingga mudah dibaca oleh JavaScript. Serializer juga terikat pada model dan gagal lebih awal bila ada ketidaksesuaian: ketika nama field pada serializer saya (`tech_stack`) tidak ada pada model, DRF langsung menampilkan `ImproperlyConfigured`, sehingga kesalahan itu cepat ketahuan.
+
+3. Autentikasi menjawab pertanyaan "siapa kamu?", yaitu proses mengenali identitas pengguna. Pada proyek ini, `SessionAuthentication` membaca cookie sesi dari request dan mengisi `request.user`. Otorisasi menjawab pertanyaan "apa yang boleh kamu lakukan?", yaitu memutuskan apakah pengguna yang sudah dikenali boleh melakukan aksi tertentu, yang pada DRF dilakukan oleh permission class seperti `IsAuthenticated`, `IsPortfolioOwnerOrReadOnly`, dan `IsPortfolioOwnerOrEditorOrReadOnly`. Seorang pengguna bisa saja berhasil terautentikasi tetapi tidak diotorisasi, misalnya pengguna biasa yang mencoba menghapus pengalaman akan mendapat 403. Pada `SessionAuthentication`, pengunjung yang belum login juga mendapat 403, bukan 401, karena DRF tidak mengirim header `WWW-Authenticate` untuk skema ini.
+
+    Hak akses harus diperiksa dengan permission class di server karena menyembunyikan tombol di template hanya mengatur tampilan, bukan keamanan. Siapa pun dapat mengirim request langsung lewat Console browser, Browsable API, atau alat seperti curl tanpa pernah melihat tombol tersebut, sehingga server tidak boleh mempercayai apa pun yang berasal dari client. Pada halaman Experience, tombol hapus memang hanya dirender untuk pemilik (`EXP_IS_SUPERUSER`), tetapi yang benar-benar mencegah Editor menghapus data adalah permission class di server, yang dibuktikan oleh `test_editor_can_update_but_not_create_or_delete`: Editor mendapat 403 pada create dan delete, dan data pada database tetap ada.
+
+4. `SessionAuthentication` mengenali pengguna dari cookie sesi, dan browser mengirim cookie tersebut secara otomatis pada setiap request ke situs yang sama, termasuk request yang dipicu dari situs lain. Karena itu, penyerang dapat membuat halaman berbahaya yang menyuruh browser korban yang sedang login mengirim POST, PATCH, atau DELETE ke API kita, dan server akan menganggapnya sah. Token CSRF mencegah hal ini: server menyetel cookie `csrftoken`, halaman kita membacanya dengan `getCookie('csrftoken')` lalu mengirimnya pada header `X-CSRFToken`, dan situs lain tidak dapat membaca cookie tersebut karena kebijakan same-origin. Karena itu, `{% csrf_token %}` tetap dipasang pada halaman agar cookie-nya selalu dibuat, dan setiap fungsi `writeProject` serta `writeExperience` menyertakan headernya. DRF hanya menerapkan pemeriksaan CSRF pada pengguna yang terautentikasi lewat sesi, sedangkan permintaan anonim ditolak oleh permission class.
+
+    Test yang memakai `force_authenticate` tidak cukup untuk membuktikan perlindungan CSRF karena metode itu menetapkan pengguna langsung pada request dan melewati class autentikasi sepenuhnya, padahal pemeriksaan CSRF dijalankan di dalam `SessionAuthentication`. Selain itu, `APIClient` secara bawaan tidak menegakkan pemeriksaan CSRF. Artinya, test seperti itu akan tetap lulus walaupun perlindungan CSRF dimatikan. Karena itu, pada proyek ini saya menulis test dengan `APIClient(enforce_csrf_checks=True)` dan `.login()` yang membuat sesi sungguhan: satu test membuktikan bahwa POST, PATCH, dan DELETE tanpa token ditolak dengan 403 dan database tidak berubah, dan satu test lainnya membuktikan bahwa request dengan token yang valid berhasil.
+
 ## AI Disclosure
-Saya menggunakan AI terutama untuk dua hal: brainstorming dan memperbaiki bug. Saat saya bingung mengenai apa yang harus ditambahkan agar situs web lebih menarik, saya meminta ide dari chatbot AI seperti Gemini milik Google dan Claude. Salah satu contohnya adalah pada fitur tambahan. Saya awalnya ingin menambahkan fitur menggunakan HTMX karena itu merupakan materi tutorial berikutnya. Namun, setelah mendengar alasan mengapa itu kurang sesuai karena harus membangun ulang banyak fitur yang sudah menggunakan AJAX. Karena itu, saya memilih ide lain, yaitu dark mode.
+Saya menggunakan AI terutama untuk dua hal: brainstorming dan memperbaiki bug. Saat saya bingung mengenai apa yang harus ditambahkan agar situs web lebih menarik, saya meminta ide dari chatbot AI seperti Gemini milik Google dan Claude. Salah satu contohnya adalah pada fitur tambahan. Saya awalnya ingin menambahkan halaman baru karena tidak memiliki ide lain untuk fitur tambahan. Namun, setelah meminta ide dari chatbot AI, saya menentukkan untuk menambahkan fitur filtering untuk tags project dan kategori experience.
 Berikut adalah prompt yang saya gunakan:
-"What should the extra feature? The next tutorial is about HTMX so maybe something using that?"
-Selain untuk bertukar pikiran, saya menggunakan AI saat mengalami kendala dengan bug, untuk merapikan kode yang berantakan, serta menambahkan komentar agar kode lebih mudah dipahami. Meskipun menggunakan AI, saya selalu memeriksa ulang kodenya dan tidak sekadar copy paste, melainkan juga melakukan penyesuaian dan perubahan sendiri. Hal ini karena AI umumnya tidak memahami cara membuat tampilan visual yang menarik bagi manusia. Jadi, saya menggunakan kode dari AI sebagai kerangka dasar yang kemudian saya modifikasi sendiri, biasanya terkait warna, ukuran, dan tingkat kecerahan. Contohnya untuk dark mode, template CSS yang diberi AI-nya lumayan berantakan dengan background yang repeating bukan flex, teks yang tidak bisa dibaca, dan lain-lainnya. Tentunya saya harus mengganti hal-hal tersebut secara mandiri untuk membuat gaya visual yang enak. Karena tugas ini melibatkan pembuatan situs web, AI tidak bisa melihat langsung seperti apa hasil akhirnya, sehingga AI mungkin tidak menyadari bahwa kode yang dihasilkannya bisa membuat tampilan situs menjadi berantakan atau kurang menarik.
+"What should the extra feature be? I want to make a new page for maybe education but that might be too much and not really a step forward."
+Selain untuk bertukar pikiran, saya menggunakan AI saat mengalami kendala dengan bug, untuk merapikan kode yang berantakan, serta menambahkan komentar agar kode lebih mudah dipahami. Meskipun menggunakan AI, saya selalu memeriksa ulang kodenya dan tidak sekadar copy paste, melainkan juga melakukan penyesuaian dan perubahan sendiri. Hal ini karena AI umumnya tidak memahami cara membuat tampilan visual yang menarik bagi manusia. Jadi, saya menggunakan kode dari AI sebagai kerangka dasar yang kemudian saya modifikasi sendiri, biasanya terkait warna, ukuran, dan tingkat kecerahan.
 
 ## Author
 **Nuno Mikael Nugroho**

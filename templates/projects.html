@@ -305,7 +305,6 @@ if (projectForm) {
     projectForm.addEventListener('submit', addProject);
 }
 
-// Event delegation: tag filters, star, and delete controls, including ones rendered later
 gridContainer.addEventListener('click', async function (event) {
     const control = event.target.closest('[data-action]');
     if (!control || control.disabled) return;
@@ -315,7 +314,6 @@ gridContainer.addEventListener('click', async function (event) {
     if (action === 'filter-tag') {
         event.preventDefault();
         const tag = control.dataset.tag;
-        // Clicking the active tag again clears the filter
         await setActiveTag(tag.toLowerCase() === activeTag.toLowerCase() ? '' : tag);
         return;
     }
